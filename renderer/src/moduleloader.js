@@ -1,4 +1,4 @@
-import BdApi from "./modules/pluginapi";
+import BdApi from "./modules/api/index";
 
 export default function() {
     const namespace = "betterdiscord";

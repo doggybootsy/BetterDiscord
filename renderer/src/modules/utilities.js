@@ -1,6 +1,5 @@
 import {Config} from "data";
 import Logger from "common/logger";
-import DOM from "./domtools";
 
 export default class Utilities {
 
@@ -25,10 +24,6 @@ export default class Utilities {
         const node = template.content.cloneNode(true);
         if (fragment) return node;
         return node.childNodes.length > 1 ? node.childNodes : node.childNodes[0];
-    }
-
-    static getTextArea() {
-        return DOM.query(".channelTextArea-1LDbYG textarea");
     }
 
     static insertText(textarea, text) {

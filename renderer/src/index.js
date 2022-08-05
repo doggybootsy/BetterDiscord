@@ -2,7 +2,7 @@ import secure from "./secure";
 import patchModuleLoad from "./moduleloader";
 import LoadingIcon from "./loadingicon";
 import BetterDiscord from "./modules/core";
-import BdApi from "./modules/pluginapi";
+import BdApi from "./modules/api/index";
 
 // Perform some setup
 secure();
