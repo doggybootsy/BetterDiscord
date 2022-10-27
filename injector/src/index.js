@@ -1,6 +1,4 @@
-import path from "path";
 import {app} from "electron";
-import Module from "module";
 
 import ipc from "./modules/ipc";
 import BrowserWindow from "./modules/browserwindow";
@@ -18,8 +16,7 @@ if (!process.argv.includes("--vanilla")) {
 
 
     // Remove CSP immediately on linux since they install to discord_desktop_core still
-    if (process.platform == "win32" || process.platform == "darwin") app.once("ready", CSP.remove);
-    else CSP.remove();
+    CSP.remove();
 }
 
 // Enable DevTools on Stable.
@@ -34,15 +31,6 @@ Object.defineProperty(global, "appSettings", {
         fakeAppSettings = value;
     },
 });
-
-// Use Discord's info to run the app
-if (process.platform == "win32" || process.platform == "darwin") {
-    const basePath = path.join(app.getAppPath(), "..", "app.asar");
-    const pkg = __non_webpack_require__(path.join(basePath, "package.json"));
-    app.setAppPath(basePath);
-    app.name = pkg.name;
-    Module._load(path.join(basePath, pkg.main), null, true);
-}
 
 // Needs to run this after Discord but before ready()
 if (!process.argv.includes("--vanilla")) {
