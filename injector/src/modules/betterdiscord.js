@@ -16,6 +16,97 @@ if (process.platform === "win32" || process.platform === "darwin") dataPath = pa
 else dataPath = process.env.XDG_CONFIG_HOME ? process.env.XDG_CONFIG_HOME : path.join(process.env.HOME, ".config"); // This will help with snap packages eventually
 dataPath = path.join(dataPath, "BetterDiscord") + "/";
 
+const script = `(async function() {
+    try {
+        function deepQuerySelector(node, selector) {
+            if (!node) return null;
+        
+            // Check the current node
+            const found = node.querySelector(selector);
+            if (found) return found;
+        
+            if (node.shadowRoot) {
+                const shadowResult = deepQuerySelector(node.shadowRoot, selector);
+                if (shadowResult) return shadowResult;
+            }
+        
+            for (let child of node.children) {
+                const childResult = deepQuerySelector(child, selector);
+                if (childResult) return childResult;
+            }
+        
+            return null;
+        }
+              
+        const header = deepQuerySelector(
+            deepQuerySelector(
+                deepQuerySelector(document, ".main-tabbed-pane"), 
+                ".tabbed-pane-left-toolbar"
+            )
+            , ".toolbar-shadow"
+        );
+    
+        async function evalInMainWindow(expression) {
+            const { Context } = await import("devtools://devtools/bundled/panels/console/../../ui/legacy/legacy.js");
+            const { RuntimeModel } = await import("devtools://devtools/bundled/panels/console/../../core/sdk/sdk.js");
+    
+            const ctx = Context.Context.instance().flavor(RuntimeModel.ExecutionContext);
+    
+            return await ctx.evaluate({
+                expression,
+                objectGroup: "console",
+                includeCommandLineAPI: true,
+                silent: false,
+                returnByValue: false,
+                generatePreview: false,
+                replMode: true,
+                allowUnsafeEvalBlockedByCSP: true
+            }, true, false);
+        }
+    
+        window._evalInMainWindow = evalInMainWindow;
+    
+        const icon = document.createElement("button");
+        icon.classList.value = "toolbar-button toolbar-item toolbar-has-glyph";
+        icon.innerHTML = '<svg class="bd-logo" width="16" height="16" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Calque_1" x="0px" y="0px" viewBox="0 0 2000 2000" enable-background="new 0 0 2000 2000" xml:space="preserve"><g><path fill="currentColor" class="bd-logo-b" d="M1402.2,631.7c-9.7-353.4-286.2-496-642.6-496H68.4v714.1l442,398V490.7h257c274.5,0,274.5,344.9,0,344.9H597.6v329.5h169.8c274.5,0,274.5,344.8,0,344.8h-699v354.9h691.2c356.3,0,632.8-142.6,642.6-496c0-162.6-44.5-284.1-122.9-368.6C1357.7,915.8,1402.2,794.3,1402.2,631.7z"/><path fill="currentColor" class="bd-logo-d" d="M1262.5,135.2L1262.5,135.2l-76.8,0c26.6,13.3,51.7,28.1,75,44.3c70.7,49.1,126.1,111.5,164.6,185.3c39.9,76.6,61.5,165.6,64.3,264.6l0,1.2v1.2c0,141.1,0,596.1,0,737.1v1.2l0,1.2c-2.7,99-24.3,188-64.3,264.6c-38.5,73.8-93.8,136.2-164.6,185.3c-22.6,15.7-46.9,30.1-72.6,43.1h72.5c346.2,1.9,671-171.2,671-567.9V716.7C1933.5,312.2,1608.7,135.2,1262.5,135.2z"/></g></svg>';
+        icon.title = "BetterDiscord v${process.env.__VERSION__}";
+        icon.style.display = "flex";
+        icon.style.alignItems = "center";
+
+        icon.onclick = async (event) => {
+            const { ContextMenu } = await import("devtools://devtools/bundled/ui/legacy/legacy.js");
+
+            const menu = new ContextMenu.ContextMenu(event);
+
+            const section = menu.defaultSection();
+
+            section.appendItem("Disable All Plugins", evalInMainWindow.bind(null, "for (const {id} of BdApi.Plugins.getAll()) BdApi.Plugins.disable(id);"), {
+                jslogContext: "bd.disable.plugins"
+            });
+            section.appendItem("Disable All Themes", evalInMainWindow.bind(null, "for (const {id} of BdApi.Themes.getAll()) BdApi.Themes.disable(id);"), {
+                jslogContext: "bd.disable.themes"
+            });
+            section.appendCheckboxItem("Disable Custom CSS", evalInMainWindow.bind(null, "customcss.disabled=!customcss.disabled"), {
+                jslogContext: "bd.disable.css",
+                checked: (await evalInMainWindow("customcss.disabled")).object.value
+            });
+
+            section.appendSeparator();
+
+            section.appendItem("Support Server", evalInMainWindow.bind(null, "BdApi.Utils.showInviteModal('rC8b2H6SCt'"), {
+                jslogContext: "bd.support"
+            });
+
+            menu.show();
+        }
+
+        icon.oncontextmenu = icon.onclick;
+          
+        header.insertBefore(icon, header.children[header.children.length - 1]);
+    }
+    catch(e) { console.error(e); throw e; }
+})();`;
+
 let hasCrashed = false;
 export default class BetterDiscord {
     static getWindowPrefs() {
@@ -113,6 +204,25 @@ export default class BetterDiscord {
         browserWindow.webContents.on("render-process-gone", () => {
             hasCrashed = true;
         });
+        
+        browserWindow.webContents.on("devtools-open-url", (event, url) => {
+            if (!(url.startsWith("https://") || url.startsWith("http://"))) return;
+
+            event.preventDefault();
+      
+            electron.shell.openExternal(url, {});
+        });
+
+        browserWindow.webContents.on("devtools-opened", () => {
+            browserWindow.webContents.devToolsWebContents?.executeJavaScript(script);
+        });
+        
+        // Uncomment this to open devtools on devtools 
+        // const devtools = new electron.BrowserWindow();
+        // devtools.webContents.openDevTools({mode: "right"});
+
+        // browserWindow.webContents.setDevToolsWebContents(devtools.webContents);
+        // browserWindow.webContents.openDevTools();
 
         // Seems to be windows exclusive. MacOS requires a build plist change
         if (electron.app.setAsDefaultProtocolClient("betterdiscord")) {

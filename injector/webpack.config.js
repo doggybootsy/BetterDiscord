@@ -1,5 +1,7 @@
 const path = require("path");
+const webpack = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
+const basePkg = require("../package.json");
 
 module.exports = (env, argv) => ({
   mode: "development",
@@ -28,6 +30,11 @@ module.exports = (env, argv) => ({
       common: path.resolve(__dirname, "..", "common")
     }
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      "process.env.__VERSION__": JSON.stringify(basePkg.version)
+    })
+  ],
   optimization: {
     minimizer: [
       new TerserPlugin({
