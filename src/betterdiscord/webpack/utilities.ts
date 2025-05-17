@@ -3,7 +3,7 @@
 import type {Webpack} from "discord";
 import {bySource} from "./filter";
 import {getModule} from "./searching";
-import {webpackRequire} from "./require";
+import {webpackExportsSymbol, webpackRequire} from "./require";
 import {getDefaultKey, shouldSkipModule, wrapFilter} from "./shared";
 
 export function* getWithKey(filter: Webpack.ExportedOnlyFilter, {target = null, ...rest}: Webpack.WithKeyOptions = {}) {
@@ -29,7 +29,12 @@ export function getMangled<T extends object>(
 
     let module = getModule<any>(filter, {raw, ...rest});
     if (!module) return mapped as T;
-    if (raw) module = module.exports;
+    if (raw) {
+        module = module.exports;
+        if (module instanceof Promise && webpackExportsSymbol in module) {
+            module = exports[webpackExportsSymbol];
+        }
+    }
 
     const moduleKeys = Object.keys(module);
     const mapperKeys = Object.keys(mappers) as Array<keyof T>;
@@ -90,8 +95,13 @@ export function getBulk<T extends any[]>(...queries: Webpack.BulkQueries[]): T {
     for (let i = 0; i < keys.length; i++) {
         const module = webpackRequire.c[keys[i]];
 
+        let exports = module.exports;
+        if (exports instanceof Promise && webpackExportsSymbol in exports) {
+            // @ts-expect-error Not typing this
+            exports = exports[webpackExportsSymbol];
+        }
 
-        if (shouldSkipModule(module.exports)) continue;
+        if (shouldSkipModule(exports)) continue;
 
         queries: for (let index = 0; index < queries.length; index++) {
             const {filter, all = false, defaultExport = true, searchExports = false, searchDefault = true, raw = false} = queries[index];
@@ -100,23 +110,23 @@ export function getBulk<T extends any[]>(...queries: Webpack.BulkQueries[]): T {
                 continue;
             }
 
-            if (filter(module.exports, module, module.id)) {
+            if (filter(exports, module, module.id)) {
                 if (!all) {
-                    returnedModules[index] = raw ? module : module.exports;
+                    returnedModules[index] = raw ? module : exports;
                     continue;
                 }
 
                 returnedModules[index] ??= [];
-                returnedModules[index].push(raw ? module : module.exports);
+                returnedModules[index].push(raw ? module : exports);
             }
 
             let defaultKey: string | undefined;
             const exportKeys: string[] = [];
-            if (searchExports) exportKeys.push(...Object.keys(module.exports));
+            if (searchExports) exportKeys.push(...Object.keys(exports));
             else if (searchDefault && (defaultKey = getDefaultKey(module))) exportKeys.push(defaultKey);
 
             for (const key of exportKeys) {
-                const exported = module.exports[key];
+                const exported = exports[key];
 
                 if (shouldSkipModule(exported)) continue;
 
@@ -124,7 +134,7 @@ export function getBulk<T extends any[]>(...queries: Webpack.BulkQueries[]): T {
                     let value = raw ? module : exported;
 
                     if (!defaultExport && defaultKey === key) {
-                        value = raw ? module : module.exports;
+                        value = raw ? module : exports;
                     }
 
                     if (!all) {
