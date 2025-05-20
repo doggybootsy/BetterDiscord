@@ -123,7 +123,7 @@ export function getBulk<T extends any[]>(...queries: Webpack.BulkQueries[]): T {
             let defaultKey: string | undefined;
             const exportKeys: string[] = [];
             if (searchExports) exportKeys.push(...Object.keys(exports));
-            else if (searchDefault && (defaultKey = getDefaultKey(module))) exportKeys.push(defaultKey);
+            else if (searchDefault && (defaultKey = getDefaultKey(exports))) exportKeys.push(defaultKey);
 
             for (const key of exportKeys) {
                 const exported = exports[key];

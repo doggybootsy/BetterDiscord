@@ -28,7 +28,7 @@ export function getModule<T>(filter: Webpack.Filter, options: Webpack.Options = 
         let defaultKey: string | undefined;
         const searchKeys: string[] = [];
         if (searchExports) searchKeys.push(...Object.keys(exports));
-        else if (searchDefault && (defaultKey = getDefaultKey(module))) searchKeys.push(defaultKey);
+        else if (searchDefault && (defaultKey = getDefaultKey(exports))) searchKeys.push(defaultKey);
 
         for (let j = 0; j < searchKeys.length; j++) {
             const key = searchKeys[j];
@@ -77,7 +77,7 @@ export function getAllModules<T extends unknown[]>(filter: Webpack.Filter, optio
         let defaultKey: string | undefined;
         const searchKeys: string[] = [];
         if (searchExports) searchKeys.push(...Object.keys(exports));
-        else if (searchDefault && (defaultKey = getDefaultKey(module))) searchKeys.push(defaultKey);
+        else if (searchDefault && (defaultKey = getDefaultKey(exports))) searchKeys.push(defaultKey);
 
         for (let j = 0; j < searchKeys.length; j++) {
             const key = searchKeys[j];

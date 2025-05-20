@@ -35,7 +35,7 @@ export function getLazy<T>(filter: Webpack.Filter, options: Webpack.LazyOptions 
             let defaultKey: string | undefined;
             const searchKeys: string[] = [];
             if (searchExports) searchKeys.push(...Object.keys(exports));
-            else if (searchDefault && (defaultKey = getDefaultKey(module))) searchKeys.push(defaultKey);
+            else if (searchDefault && (defaultKey = getDefaultKey(exports))) searchKeys.push(defaultKey);
 
             for (let i = 0; i < searchKeys.length; i++) {
                 const key = searchKeys[i];
