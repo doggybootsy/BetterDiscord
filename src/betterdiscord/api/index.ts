@@ -17,6 +17,7 @@ import ContextMenu from "./contextmenu";
 import fetch from "./fetch";
 import Logger from "./logger";
 import CommandAPI from "./commands";
+import Hooks from "./hooks";
 
 import ColorInput from "@ui/settings/components/color";
 import DropdownInput from "@ui/settings/components/dropdown";
@@ -51,6 +52,7 @@ const DOMAPI = new DOM();
 const ContextMenuAPI = new ContextMenu();
 const CommandsAPI = new CommandAPI();
 const DefaultLogger = new Logger();
+const DefaultHooks = new Hooks();
 
 /**
  * `Components` is a namespace holding a series of React components. It is available under {@link BdApi}.
@@ -108,6 +110,7 @@ export default class BdApi {
     DOM: DOM = DOMAPI;
     Logger: Logger = DefaultLogger;
     Commands: CommandAPI = CommandsAPI;
+    Hooks: Hooks = DefaultHooks;
     React = React;
     ReactDOM = ReactDOM;
     version = version;
@@ -117,6 +120,7 @@ export default class BdApi {
     static DOM: DOM;
     static Logger: Logger;
     static Commands: CommandAPI;
+    static Hooks: Hooks;
     static React = React;
     static ReactDOM = ReactDOM;
     static version = version;
@@ -145,6 +149,7 @@ export default class BdApi {
         this.DOM = new DOM(pluginName);
         this.Logger = new Logger(pluginName);
         this.Commands = new CommandAPI(pluginName);
+        this.Hooks = new Hooks(pluginName);
 
         bounded.set(pluginName, this);
     }
@@ -226,6 +231,8 @@ BdApi.ContextMenu = ContextMenuAPI;
  * @type Components
  */
 BdApi.Components = Components;
+
+BdApi.Hooks = DefaultHooks;
 
 /**
  * An instance of {@link CommandAPI} for adding slash commands.

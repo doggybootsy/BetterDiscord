@@ -18,7 +18,7 @@ import {buildDirectionOptions, makeBasicButton, getState, saveState, AddonHeader
 import Settings from "@stores/settings";
 import Text from "@ui/base/text";
 import {CheckIcon, ChevronRightIcon, FolderIcon, LayoutGridIcon, StoreIcon, StretchHorizontalIcon, XIcon} from "lucide-react";
-import {useInternalStore} from "@ui/hooks";
+import {useStateFromStores} from "@ui/hooks";
 import {shallowEqual} from "fast-equals";
 
 
@@ -124,8 +124,8 @@ export default function AddonList({title, store}) {
     const [view, setView] = useState(getState.bind(null, store.prefix, "view", "list"));
 
 
-    const addonList = useInternalStore(store, () => store.addonList.concat(), [store], shallowEqual);
-    const addonState = useInternalStore(store, () => Object.assign({}, store.state), [store], shallowEqual);
+    const addonList = useStateFromStores(store, () => store.addonList.concat(), [store], shallowEqual);
+    const addonState = useStateFromStores(store, () => Object.assign({}, store.state), [store], shallowEqual);
 
     const onChange = useCallback((id) => {
         store.toggleAddon(id);

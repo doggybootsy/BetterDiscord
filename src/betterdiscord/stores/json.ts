@@ -87,6 +87,87 @@ export default new class JsonStore extends Store {
         }
     }
 
+    #pluginListeners: Map<string, {keys: Map<string, Set<(newData?: unknown) => void>>, all: Set<(key: string, newData?: unknown) => void>;}> = new Map();
+    #emitPluginListeners(pluginName: string, key: string, newData?: unknown) {
+        if (!this.#pluginListeners.has(pluginName)) return;
+
+        const pluginListeners = this.#pluginListeners.get(pluginName)!;
+
+        for (const element of pluginListeners.all) {
+            // So plugins can do arguments.length === 1 to see if it was a delete
+            if (arguments.length === 3) {
+                element(key, newData);
+            }
+            else {
+                element(key);
+            }
+        }
+
+        if (!pluginListeners.keys.has(key)) return;
+
+        const listeners = pluginListeners.keys.get(key)!;
+
+        for (const element of listeners) {
+            // So plugins can do arguments.length === 0 to see if it was a delete
+            if (arguments.length === 3) {
+                element(newData);
+            }
+            else {
+                element();
+            }
+        }
+    }
+
+    addPluginListener(pluginName: string, key: string | true, callback: any) {
+        if (!this.#pluginListeners.has(pluginName)) {
+            this.#pluginListeners.set(pluginName, {
+                keys: new Map(),
+                all: new Set()
+            });
+        }
+
+        const pluginListeners = this.#pluginListeners.get(pluginName)!;
+        if (key === true) {
+            pluginListeners.all.add(callback);
+            return;
+        }
+
+        if (!pluginListeners.keys.has(key)) {
+            pluginListeners.keys.set(key, new Set());
+        }
+
+        const listeners = pluginListeners.keys.get(key)!;
+        listeners.add(callback);
+    }
+    removePluginListener(pluginName: string, key: string | true, callback: any) {
+        if (!this.#pluginListeners.has(pluginName)) return;
+
+        const pluginListeners = this.#pluginListeners.get(pluginName)!;
+        if (key === true) {
+            pluginListeners.all.delete(callback);
+            if (!pluginListeners.keys.size && !pluginListeners.all.size) {
+                this.#pluginListeners.delete(pluginName)!;
+            }
+
+            return;
+        }
+
+        if (!pluginListeners.keys.has(key)) {
+            return;
+        }
+
+        const listeners = pluginListeners.keys.get(key)!;
+        listeners.delete(callback);
+
+        if (!listeners.size) {
+            pluginListeners.keys.delete(key);
+        }
+
+        if (!pluginListeners.keys.size && !pluginListeners.all.size) {
+            this.#pluginListeners.delete(pluginName)!;
+        }
+    }
+
     #savePluginData(pluginName: string) {
         fs.writeFileSync(this.#getPluginFile(pluginName), JSON.stringify(this.pluginCache[pluginName], null, 4));
         this.emit();
@@ -103,11 +184,13 @@ export default new class JsonStore extends Store {
 
         this.pluginCache[pluginName][key] = value;
         this.#savePluginData(pluginName);
+        this.#emitPluginListeners(pluginName, key, value);
     }
 
     deleteData(pluginName: string, key: string) {
         this.#ensurePluginData(pluginName); // Ensure plugin data, if any, is cached
         delete this.pluginCache[pluginName][key];
         this.#savePluginData(pluginName);
+        this.#emitPluginListeners(pluginName, key);
     }
 };

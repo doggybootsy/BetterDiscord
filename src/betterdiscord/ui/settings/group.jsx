@@ -14,14 +14,14 @@ import Filepicker from "./components/file";
 import Button from "../base/button";
 import Position from "@ui/settings/components/position";
 import {SettingsContext} from "@ui/contexts";
-import {useInternalStore} from "@ui/hooks";
+import {useStateFromStores} from "@ui/hooks";
 import SettingsStore from "@stores/settings";
 
 const {useCallback} = React;
 
 
 function SettingsProvider({collection, category, id, children}) {
-    const state = useInternalStore(SettingsStore, () => SettingsStore.get(collection, category, id));
+    const state = useStateFromStores(SettingsStore, () => SettingsStore.get(collection, category, id));
     return <SettingsContext.Provider value={state}>{children}</SettingsContext.Provider>;
 }
 

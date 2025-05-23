@@ -1,8 +1,9 @@
 import {useInsertionEffect, useReducer, useRef} from "@modules/react";
 import type Store from "../stores/base";
 import type React from "react";
+import type {FluxStore} from "discord/modules";
 
-export function useInternalStore<T>(stores: Store | Store[], factory: () => T, deps?: React.DependencyList, areStateEqual: (oldState: T, newState: T) => boolean = (oldState, newState) => oldState === newState): T {
+export function useStateFromStores<T>(stores: Store | FluxStore | Array<Store | FluxStore>, factory: () => T, deps?: React.DependencyList, areStateEqual: (oldState: T, newState: T) => boolean = (oldState, newState) => oldState === newState): T {
     const [, forceUpdate] = useForceUpdate();
     const state = useRef(undefined as T);
     const factoryRef = useRef(undefined as unknown as () => T);
