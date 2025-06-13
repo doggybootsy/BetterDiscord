@@ -84,6 +84,8 @@ export default abstract class AddonManager extends Store {
     windows = new Set<string>();
 
     initialize() {
+        document.getElementById("bd-early-themes")?.remove();
+
         Settings.registerAddonPanel(this);
         return this.loadAllAddons();
     }

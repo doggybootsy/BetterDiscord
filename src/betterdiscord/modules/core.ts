@@ -37,9 +37,15 @@ export default new class Core {
 
         IPC.getSystemAccentColor().then(value => DOMManager.injectStyle("bd-os-values", `:root {--os-accent-color: #${value};}`));
 
+
         // Load css early
         Logger.log("Startup", "Injecting BD Styles");
         DOMManager.injectStyle("bd-stylesheet", Styles.toString());
+
+        // Init themes early
+        Logger.log("Startup", "Loading Themes");
+        // const themeErrors = [];
+        const themeErrors = ThemeManager.initialize();
 
         Logger.log("Startup", "Initializing AddonStore");
         AddonStore.initialize();
@@ -80,10 +86,6 @@ export default new class Core {
         Logger.log("Startup", "Loading Plugins");
         // const pluginErrors = [];
         const pluginErrors = PluginManager.initialize();
-
-        Logger.log("Startup", "Loading Themes");
-        // const themeErrors = [];
-        const themeErrors = ThemeManager.initialize();
 
         Logger.log("Startup", "Initializing Updater");
         Updater.initialize();
