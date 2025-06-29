@@ -11,7 +11,7 @@ interface Options<T> {
 
 // This is 2 prevent from doing access twice in the same component
 // Because of hooks and such
-let hasBeenInReact = false;
+let hasBeenCalledInStack = false;
 
 // importing react crashes discord
 let react: typeof import("react");
@@ -23,11 +23,11 @@ function inReactContext() {
 
     if (!String((react as any).__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE.H.useId).includes("throw")) {
         if (typeof scheduler === "object") {
-            if (hasBeenInReact) return false;
+            if (hasBeenCalledInStack) return false;
 
-            hasBeenInReact = true;
+            hasBeenCalledInStack = true;
             scheduler.postTask(() => {
-                hasBeenInReact = false;
+                hasBeenCalledInStack = false;
             });
         }
 
@@ -60,7 +60,19 @@ function inReactContext() {
  * setter(v => !v) // setter
  */
 export default function createSignal<T>(defaultValue: T | (() => T), opts?: Options<T>): Signal<T> {
-    let state = typeof defaultValue === "function" ? (defaultValue as () => T)() : defaultValue;
+    const listeners = new Set<(value: T) => void>();
+
+    let state: T;
+    const createdInReactContext = inReactContext();
+    if (createdInReactContext) {
+        const used = react.useState(defaultValue);
+
+        state = used[0];
+        listeners.add((value) => used[1](() => value));
+    }
+    else {
+        state = typeof defaultValue === "function" ? (defaultValue as () => T)() : defaultValue;
+    }
 
     let equals = (prev: T, next: T) => Object.is(prev, next);
     if (typeof opts?.equals === "function") {
@@ -70,15 +82,19 @@ export default function createSignal<T>(defaultValue: T | (() => T), opts?: Opti
         equals = () => true;
     }
 
-    const listeners = new Set<(value: T) => void>();
-
     return [
         () => {
-            if (inReactContext()) {
-                react.useSyncExternalStore((onStoreChange) => {
-                    listeners.add(onStoreChange);
-                    return () => void listeners.delete(onStoreChange);
-                }, () => Symbol());
+            if (!createdInReactContext && inReactContext()) {
+                const [, forceUpdate] = react.useReducer<number, any>((num) => num + 1, 0);
+
+                react.useInsertionEffect(() => {
+                    function listener() {
+                        forceUpdate();
+                    }
+
+                    listeners.add(listener);
+                    return () => void listeners.delete(listener);
+                }, []);
             }
 
             return state;
