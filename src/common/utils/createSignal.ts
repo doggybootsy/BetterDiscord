@@ -51,10 +51,10 @@ function inReactContext(smart: boolean) {
  *
  * @example
  * // Plugin Storage
- * const [ access, setter, addChangeListener ] = createSignal(BdApi.Data.load<boolean>("MyPlugin", "key"));
- *
- * // Automatically save plugin data
- * addChangeListener(BdApi.Data.save.bind(null, "MyPlugin", "key"));
+ * const [ access, setter ] = createSignal(BdApi.Data.load<boolean>("MyPlugin", "key"), {
+ *      // Automatically save plugin data
+ *      onChange: BdApi.Data.save.bind(null, "MyPlugin", "key")
+ * });
  *
  * access(); // access
  * setter(v => !v) // setter
@@ -92,7 +92,7 @@ export default function createSignal<T>(defaultValue: T | (() => T), opts?: Opti
         equals = opts.equals;
     }
     else if (opts?.equals === false) {
-        equals = () => true;
+        equals = () => false;
     }
 
     const createReturnee: () => Signal<T> = () => [
