@@ -1,12 +1,12 @@
 
 type Signal<T> = [
     accessor: () => T,
-    setter: (value: T | ((prev: T) => T)) => T,
-    addChangeListener: (callback: (value: T) => void) => () => void
+    setter: (value: T | ((prev: T) => T)) => T
 ];
 
 interface Options<T> {
     equals?: false | ((prev: T, next: T) => boolean);
+    onChange?(value: T): void;
 }
 
 // This is 2 prevent from doing access twice in the same component
@@ -15,14 +15,14 @@ let hasBeenCalledInStack = false;
 
 // importing react crashes discord
 let react: typeof import("react");
-function inReactContext() {
+function inReactContext(smart: boolean) {
     if (!react) {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         react = require("@modules/react").default;
     }
 
     if (!String((react as any).__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE.H.useId).includes("throw")) {
-        if (typeof scheduler === "object") {
+        if (smart && typeof scheduler === "object") {
             if (hasBeenCalledInStack) return false;
 
             hasBeenCalledInStack = true;
@@ -60,18 +60,31 @@ function inReactContext() {
  * setter(v => !v) // setter
  */
 export default function createSignal<T>(defaultValue: T | (() => T), opts?: Options<T>): Signal<T> {
-    const listeners = new Set<(value: T) => void>();
-
     let state: T;
-    const createdInReactContext = inReactContext();
-    if (createdInReactContext) {
-        const used = react.useState(defaultValue);
+    const createdInReactContext = inReactContext(false);
 
-        state = used[0];
-        listeners.add((value) => used[1](() => value));
+    const listeners = createdInReactContext ? react.useRef(new Set<(value: T) => void>()).current : new Set<(value: T) => void>();
+
+    if (createdInReactContext) {
+        const [currentState, setState] = react.useState(() => ({
+            current: typeof defaultValue === "function" ? (defaultValue as () => T)() : defaultValue
+        }));
+
+        state = currentState.current;
+        listeners.add(react.useCallback((value) => setState({current: value}), []));
+
+        const once = react.useRef(true);
+        if (once.current && typeof opts?.onChange === "function") {
+            listeners.add(opts.onChange);
+            once.current = false;
+        }
     }
     else {
         state = typeof defaultValue === "function" ? (defaultValue as () => T)() : defaultValue;
+
+        if (typeof opts?.onChange === "function") {
+            listeners.add(opts.onChange);
+        }
     }
 
     let equals = (prev: T, next: T) => Object.is(prev, next);
@@ -82,9 +95,9 @@ export default function createSignal<T>(defaultValue: T | (() => T), opts?: Opti
         equals = () => true;
     }
 
-    return [
+    const createReturnee: () => Signal<T> = () => [
         () => {
-            if (!createdInReactContext && inReactContext()) {
+            if (!createdInReactContext && inReactContext(true)) {
                 const [, forceUpdate] = react.useReducer<number, any>((num) => num + 1, 0);
 
                 react.useInsertionEffect(() => {
@@ -105,16 +118,15 @@ export default function createSignal<T>(defaultValue: T | (() => T), opts?: Opti
             if (!equals(state, newState)) {
                 state = newState;
 
-                for (const listener of listeners) {
-                    listener(state);
+                for (const element of listeners) {
+                    element(state);
                 }
             }
 
             return state;
-        },
-        (callback) => {
-            listeners.add(callback);
-            return () => void listeners.delete(callback);
         }
     ];
+
+    if (createdInReactContext) react.useMemo(createReturnee, [state]);
+    return createReturnee();
 }
