@@ -40,10 +40,17 @@ interface DiscordWindow {
     BetterDiscordPreload(): typeof PreloadAPI;
 }
 
+interface Scheduler {
+    yield(): Promise<void>;
+    postTask(cb: () => void): void;
+}
+
 declare global {
     const DiscordNative: DiscordNativeAPI;
     // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     interface Window extends DiscordWindow {};
+
+    let scheduler: Scheduler | undefined;
 
     interface Node {
         __reactFiber$?: Fiber,
@@ -53,4 +60,3 @@ declare global {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface Window extends DiscordWindow {};
-
