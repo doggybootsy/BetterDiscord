@@ -1,6 +1,6 @@
 
 type Signal<T> = [
-    accessor: () => T,
+    accessor: (forceNoUseHook?: boolean) => T,
     setter: (value: T | ((prev: T) => T)) => T
 ];
 
@@ -96,8 +96,8 @@ export default function createSignal<T>(defaultValue: T | (() => T), opts?: Opti
     }
 
     const createReturnee: () => Signal<T> = () => [
-        () => {
-            if (!createdInReactContext && inReactContext(true)) {
+        (forceNoUseHook) => {
+            if (!forceNoUseHook && !createdInReactContext && inReactContext(true)) {
                 const [, forceUpdate] = react.useReducer<number, any>((num) => num + 1, 0);
 
                 react.useInsertionEffect(() => {
