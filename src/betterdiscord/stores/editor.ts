@@ -44,17 +44,17 @@ export default new class EditorStore extends Store {
         });
     }
 
-    listener() {
+    private listener() {
         RemoteAPI.editor.updateSettings({
             options: this.getEditorOptions(),
             liveUpdate: SettingsManager.get("settings", "customcss", "liveUpdate"),
             discordTheme: Stores.ThemeStore?.theme || "dark"
         });
 
-        this.emit();
+        this.emitChange();
     }
 
-    getEditorOptions() {
+    public getEditorOptions() {
         let theme = SettingsManager.get<"vs" | "vs-dark" | "hc-black" | "hc-light" | "system">("settings", "editor", "theme");
 
         if (theme === "system") {

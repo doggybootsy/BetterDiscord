@@ -14,7 +14,7 @@ import Filepicker from "./components/file";
 import Button, {type ButtonProps} from "../base/button";
 import Position from "@ui/settings/components/position";
 import {SettingsContext} from "@ui/contexts";
-import {useInternalStore} from "@ui/hooks";
+import {useStateFromStores} from "@ui/hooks";
 import SettingsStore from "@stores/settings";
 import type {Setting, SettingItem} from "@data/settings";
 import type {PropsWithChildren, ReactNode} from "react";
@@ -23,20 +23,16 @@ const {useCallback} = React;
 
 
 function SettingsProvider({collection, category, id, children}: PropsWithChildren<{collection: string; category: string; id: string;}>) {
-    const getSettingState = React.useCallback(() => {
+    const settingState = useStateFromStores(SettingsStore, () => {
         const setting = SettingsStore.getSetting(collection, category, id);
+
         return {
             value: SettingsStore.get(collection, category, id),
             disabled: setting?.disabled ?? false
         };
-    }, [collection, category, id]);
+    }, [collection, category, id], true);
 
-    const settingState = useInternalStore(SettingsStore, getSettingState);
-
-    // Only recreate context value when data actually changes
-    const context = React.useMemo(() => settingState, [settingState]);
-
-    return <SettingsContext.Provider value={context}>{children}</SettingsContext.Provider>;
+    return <SettingsContext.Provider value={settingState}>{children}</SettingsContext.Provider>;
 }
 
 export type GroupProps = PropsWithChildren<{

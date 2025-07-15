@@ -43,7 +43,7 @@
         "@utils/*": ["./src/betterdiscord/utils/*"],
         "@webpack": ["./src/betterdiscord/webpack"],
     },
-    "typeRoots": ["node_modules/@types", "src/betterdiscord/types"]
+    "typeRoots": ["./node_modules/@types", "src/betterdiscord/types"]
   },
   "include": [
     "src/**/*",

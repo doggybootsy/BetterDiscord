@@ -17,6 +17,7 @@ import ContextMenu from "./contextmenu";
 import fetch from "./fetch";
 import Logger from "./logger";
 import CommandAPI from "./commands";
+import Hooks from "./hooks";
 
 import ColorInput from "@ui/settings/components/color";
 import DropdownInput from "@ui/settings/components/dropdown";
@@ -51,6 +52,7 @@ const DOMAPI = new DOM<false>();
 const ContextMenuAPI = new ContextMenu();
 const CommandsAPI = new CommandAPI<false>();
 const DefaultLogger = new Logger<false>();
+const DefaultHooks = new Hooks<false>();
 
 /**
  * `Components` is a namespace holding a series of React components. It is available under {@link BdApi}.
@@ -108,6 +110,7 @@ export default class BdApi {
     DOM: DOM<true> = DOMAPI as DOM<true>;
     Logger: Logger<true> = DefaultLogger as Logger<true>;
     Commands: CommandAPI<true> = CommandsAPI as unknown as CommandAPI<true>;
+    Hooks: Hooks<true> = DefaultHooks as Hooks<true>;
     React = React;
     ReactDOM = ReactDOM;
     version = version;
@@ -117,6 +120,7 @@ export default class BdApi {
     static DOM: DOM<false>;
     static Logger: Logger<false>;
     static Commands: CommandAPI<false>;
+    static Hooks: Hooks<false>;
     static React = React;
     static ReactDOM = ReactDOM;
     static version = version;
@@ -145,6 +149,7 @@ export default class BdApi {
         this.DOM = new DOM(pluginName);
         this.Logger = new Logger(pluginName);
         this.Commands = new CommandAPI(pluginName);
+        this.Hooks = new Hooks(pluginName);
 
         bounded.set(pluginName, this);
     }
@@ -232,6 +237,12 @@ BdApi.Components = Components;
  * @type CommandAPI
  */
 BdApi.Commands = CommandsAPI;
+
+/**
+ * An instance of {@link Hooks} for using react hooks.
+ * @type Hooks
+ */
+BdApi.Hooks = DefaultHooks;
 
 /**
  * An instance of {@link Net} for using network related tools.

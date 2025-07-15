@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import {comparator} from "@structs/semver";
 import {debounce, extend, findInTree, getNestedProp} from "@common/utils";
-
+import Store from "@stores/base";
 
 /**
  * `Utils` is a utility containing commonly reused functions. Instance is accessible through the {@link BdApi}.
@@ -87,6 +87,8 @@ const Utils = {
      * @returns {number} 0 indicates equal, -1 indicates left hand greater, 1 indicates right hand greater
      */
     semverCompare: comparator,
+
+    Store: Store
 } as const;
 
 // https://stackoverflow.com/questions/58434389/typescript-deep-keyof-of-a-nested-object/58436959#58436959

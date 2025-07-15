@@ -1,11 +1,60 @@
 import {useInsertionEffect, useReducer, useRef} from "@modules/react";
 import type Store from "../stores/base";
 import type React from "react";
+import type {FluxStore} from "../types/discord/modules";
+import {shallowEqual} from "fast-equals";
 
-export function useInternalStore<T>(stores: Store | Store[], factory: () => T, deps?: React.DependencyList, areStateEqual: (oldState: T, newState: T) => boolean = (oldState, newState) => oldState === newState): T {
+type StoreType = Store | FluxStore;
+
+/**
+ * Dynamically get data from Discord Flux Stores and BetterDiscord Stores
+ * @example
+ * // Discord Flux Store
+ * function MyComponent() {
+ *      const currentUser = useStateFromStores(BdApi.Webpack.Stores.UserStore, () => BdApi.Webpack.Stores.UserStore.getCurrentUser());
+ *
+ *      // Do stuff with the current user
+ * }
+ *
+ * @example
+ * // Custom store
+ * const MyStore = new class extends BdApi.Utils.Store {
+ *      getData() {return this._value;}
+ *      setData(value) {
+ *          this._value = value;
+ *          this.emitChange();
+ *      }
+ * }
+ *
+ * function MyComponent() {
+ *      const currentData = useStateFromStores(MyStore, () => MyStore.getData());
+ *
+ *      // Do stuff with the current data
+ * }
+ *
+ * // Later
+ * MyStore.setData(123); // Will automatically update the UI
+ *
+ * @example
+ * // Using more than one store
+ * function MyComponent() {
+ *      const selectedChannel = useStateFromStores([
+ *          BdApi.Webpack.Stores.SelectedChannelStore,
+ *          BdApi.Webpack.Stores.ChannelStore
+ *      ], () => {
+ *          const currentChannelId = BdApi.Webpack.Stores.SelectedChannelStore.getCurrentlySelectedChannelId();
+ *
+ *          return BdApi.Webpack.Stores.ChannelStore.getChannel(currentChannelId);
+ *      });
+ *
+ *      // Do stuff with the currently selected channel
+ * }
+ */
+export function useStateFromStores<T>(stores: StoreType | readonly StoreType[], factory: () => T, deps?: React.DependencyList, areStatesEqual: true | ((oldState: T, newState: T) => boolean) = (oldState, newState) => oldState === newState): T {
     const [, forceUpdate] = useForceUpdate();
     const state = useRef(undefined as T);
     const factoryRef = useRef(undefined as unknown as () => T);
+    const compareStates = useRef(areStatesEqual === true ? shallowEqual : areStatesEqual).current;
 
     if (factoryRef.current === undefined) {
         factoryRef.current = factory;
@@ -27,7 +76,7 @@ export function useInternalStore<T>(stores: Store | Store[], factory: () => T, d
 
             const newState = factory();
 
-            if (!areStateEqual(state.current, newState)) {
+            if (!compareStates(state.current, newState)) {
                 state.current = newState;
             }
 
@@ -42,10 +91,10 @@ export function useInternalStore<T>(stores: Store | Store[], factory: () => T, d
     prevDeps.current = deps;
 
     useInsertionEffect(() => {
-        const $stores = Array.isArray(stores) ? stores : [stores];
+        const $stores: readonly StoreType[] = Array.isArray(stores) ? stores : [stores];
         function listener() {
             const newState = factoryRef.current();
-            if (!areStateEqual(state.current, newState)) {
+            if (!compareStates(state.current, newState)) {
                 state.current = newState;
                 forceUpdate();
             }
