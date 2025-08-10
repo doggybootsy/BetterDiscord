@@ -2,6 +2,13 @@
     display: flex;
     flex-direction: column;
     background: var(--bd-editor-background, var(--background-base-lower));
+    flex-grow: 1;
+}
+
+#bd-editor-panel .editor-wrapper,
+#bd-editor-panel .editor-wrapper .editor {
+    flex-grow: 1;
+    height: 100%;
 }
 
 #bd-editor-controls button {

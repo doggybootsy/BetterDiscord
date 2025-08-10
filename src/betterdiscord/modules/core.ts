@@ -28,6 +28,8 @@ import CommandManager from "./commandmanager";
 // import NotificationUI from "@ui/notifications";
 import InstallCSS from "@ui/customcss/mdinstallcss";
 
+import RouteManager from "@modules/routemanager";
+
 export default new class Core {
     hasStarted = false;
 
@@ -62,6 +64,9 @@ export default new class Core {
 
         Logger.log("Startup", "Initializing Internal InstallCSS");
         InstallCSS.initialize();
+
+        Logger.log("Startup", "Initializing RouteManager");
+        RouteManager.initialize();
 
         Logger.log("Startup", "Waiting for connection...");
         await this.waitForConnection();
