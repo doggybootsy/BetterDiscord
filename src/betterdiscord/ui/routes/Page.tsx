@@ -25,26 +25,26 @@ function HeaderIcon(props: ToolbarItem) {
  * This is the Base component for {@link Page}
  * It doesn't do anything fancy
  */
-export function BasePage(props: React.PropsWithChildren) {
+export const BasePage = React.forwardRef((props: React.PropsWithChildren, ref: React.ForwardedRef<HTMLDivElement>) => {
     const ownsChannelBar = useInternalStore(RouteManager, () => RouteManager.channelBar.owns());
+
+    const content = (
+        <main className="bd-page" ref={ref}>
+            {props.children}
+        </main>
+    );
 
     if (!ownsChannelBar) {
         return (
             <div className="bd-content-wrapper">
-                <main className="bd-page">
-                    {props.children}
-                </main>
+                {content}
                 <Sidebar fallback />
             </div>
         );
     }
 
-    return (
-        <main className="bd-page">
-            {props.children}
-        </main>
-    );
-}
+    return content;
+});
 
 function Page(props: PageProps) {
     const toolbar = React.useMemo(() => Array.isArray(props.toolbar) ? props.toolbar.map((iProps, index) => {

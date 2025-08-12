@@ -39,9 +39,27 @@
 @import "./text.css";
 
 :root {
-    --bd-brand: #3E82E5;
-    --bd-brand-hover: #3875CE;
-    --bd-brand-active: #3268B7;
+    --bd-brand: hsl(216deg calc(76% * var(--saturation-factor, 1)) 57%);
+    --bd-brand-hover: hsl(216deg calc(60% * var(--saturation-factor, 1)) 51%);
+    --bd-brand-active: hsl(216deg calc(57% * var(--saturation-factor, 1)) 46%);
+}
+
+@property --bd-brand {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: #3E82E5;
+}
+
+@property --bd-brand-hover {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: #3875CE;
+}
+
+@property --bd-brand-active {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: #3268B7;
 }
 
 .bd-chat-badge {

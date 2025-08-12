@@ -82,7 +82,11 @@
 }
 
 .bd-nav {
-    padding: 8px 10px;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px;
 }
 
 .bd-nav-item {
@@ -151,3 +155,60 @@
 .bd-content-wrapper .bd-sidebar {
     flex: 0 240px;
 }
+
+.bd-nav-seperator {
+    background-color: var(--divider-subtle);
+    border: 0;
+    box-shadow: border-box;
+    height: 1px;
+    margin: 10px 0;
+    width: 100%;
+}
+
+.bd-home {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    height: 300px;
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+}
+
+.bd-home + .bd-content {
+    z-index: 1;
+}
+
+.bd-home-sep {
+    flex: 1 0 calc(300px - 24px - 48px);
+}
+
+.bd-home > :where(div, canvas) {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+}
+
+.bd-home-content {
+    height: calc(100% - 50px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.bd-home-logo {
+    padding: 16px;
+    background-color: var(--bd-brand);
+    border-radius: 50%;
+    color: white;
+}
+
+.bd-home-greeting {
+    color: white;
+}
+
+/* [data-dark-mode="true"] :where(.bd-home-logo, .bd-home-greeting) {
+    color: black;
+} */

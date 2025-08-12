@@ -135,4 +135,4 @@ function BetterDiscordRoute(props: BetterDiscordRouteProps) {
     return content;
 }
 
-export default BetterDiscordRoute;
+export default React.memo(BetterDiscordRoute);

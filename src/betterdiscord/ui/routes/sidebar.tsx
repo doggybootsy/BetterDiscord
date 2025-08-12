@@ -32,6 +32,10 @@ function NavButton({label, icon, route, onClick: originalOnClick}: {
     );
 }
 
+function Seperator() {
+    return <div className="bd-nav-seperator" />;
+}
+
 function Sidebar({fallback}: {fallback?: boolean;}) {
     if (!fallback) {
         RouteManager.channelBar.doOwn();
@@ -61,6 +65,7 @@ function Sidebar({fallback}: {fallback?: boolean;}) {
                     label="Home"
                     icon={<Home />}
                 />
+                <Seperator />
                 {Settings.collections.map((collection) => (
                     <NavButton
                         route={`/${collection.id}`}
@@ -68,11 +73,13 @@ function Sidebar({fallback}: {fallback?: boolean;}) {
                         icon={<Cog />}
                     />
                 ))}
+                <Seperator />
                 <NavButton
                     route="/updates"
                     label={t("Panels.updates")}
                     icon={<Cloudy />}
                 />
+                <Seperator />
                 <NavButton
                     route="/custom-css"
                     label={t("Panels.customcss")}
@@ -103,6 +110,8 @@ function Sidebar({fallback}: {fallback?: boolean;}) {
                     label="Changelog"
                     icon={<HistoryIcon />}
                 /> */}
+
+                <Seperator />
             </nav>
             <div className="bd-links">
                 <DiscordModules.Tooltip text="Github">
