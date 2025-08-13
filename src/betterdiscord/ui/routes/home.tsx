@@ -4,7 +4,9 @@ import {BasePage} from "./Page";
 import {useInternalStore} from "@ui/hooks";
 import {getModule, Stores} from "@webpack";
 import HeaderBar from "./Header";
-import {Bird, Rabbit, Squirrel} from "lucide-react";
+import {Bird, Rabbit, Squirrel, type LucideProps} from "lucide-react";
+import Button from "@ui/base/button";
+import routemanager from "@modules/routemanager";
 
 function Logo(props: any) {
     return (
@@ -20,6 +22,121 @@ function Logo(props: any) {
 const AccessibilityContext = getModule<React.Context<{reducedMotion: {enabled: false;};}>>(m => m?._currentValue?.reducedMotion, {searchExports: true}) || React.createContext({
     reducedMotion: {enabled: false}
 });
+
+class FloatingStore {
+    private static svg = `<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+     viewBox="0 0 2000 2000" enable-background="new 0 0 2000 2000" xml:space="preserve">
+<g opacity="0.3">
+    <path fill="#000000" d="M638.3,580c-5.9-5.9-15.4-5.9-21.2,0v0l-26,26l-26-26c-5.9-5.9-15.4-5.9-21.2,0s-5.9,15.4,0,21.2l26,26
+        l-26,26c-5.9,5.9-5.9,15.4,0,21.2s15.4,5.9,21.2,0l26-26l26,26c5.9,5.9,15.4,5.9,21.2,0s5.9-15.4,0-21.2l-26-26l26-26
+        C644.2,595.3,644.2,585.8,638.3,580z"/>
+    <path fill="#000000" d="M1479.6,1437.2c-5.9-5.9-15.4-5.9-21.2,0l0,0l-26,26l-26-26c-5.9-5.9-15.4-5.9-21.2,0
+        c-5.9,5.9-5.9,15.4,0,21.2h0l26,26l-26,26c-5.9,5.9-5.9,15.4,0,21.2c5.9,5.9,15.4,5.9,21.2,0l26-26l26,26c5.9,5.9,15.4,5.9,21.2,0
+        c5.9-5.9,5.9-15.4,0-21.2l-26-26l26-26C1485.5,1452.5,1485.5,1443,1479.6,1437.2z"/>
+    <path fill="#000000" d="M601.7,1738.7c-5.9-5.9-15.4-5.9-21.2,0v0l-26,26l-26-26c-5.9-5.9-15.4-5.9-21.2,0
+        c-5.9,5.9-5.9,15.4,0,21.2h0l26,26l-26,26c-5.9,5.9-5.9,15.4,0,21.2c5.9,5.9,15.4,5.9,21.2,0l26-26l26,26c5.9,5.9,15.4,5.9,21.2,0
+        c5.9-5.9,5.9-15.4,0-21.2l-26-26l26-26C607.6,1754.1,607.6,1744.6,601.7,1738.7z"/>
+    <path fill="#000000" d="M1736.2,305.8c5.9,5.9,15.4,5.9,21.2,0c5.9-5.9,5.9-15.4,0-21.2l-26-26l26-26c5.9-5.9,5.9-15.4,0-21.2
+        c-5.9-5.9-15.4-5.9-21.2,0h0l-26,26l-26-26c-5.9-5.9-15.4-5.9-21.2,0c-5.9,5.9-5.9,15.4,0,21.2h0l26,26l-26,26
+        c-5.9,5.9-5.9,15.4,0,21.2c5.9,5.9,15.4,5.9,21.2,0l26-26L1736.2,305.8z"/>
+    <path fill="#000000" d="M1174.9,539c-5-3.4-10.5-6-16.3-7.8c-5.9-1.8-12.1-2.8-18.5-2.8c-8.6,0-16.8,1.7-24.2,4.9
+        c-11.2,4.7-20.7,12.6-27.4,22.5c-3.4,5-6,10.5-7.8,16.3c-1.8,5.9-2.8,12.1-2.8,18.5c0,8.6,1.7,16.8,4.9,24.2
+        c4.7,11.2,12.6,20.7,22.5,27.4c5,3.4,10.5,6,16.3,7.8c5.9,1.8,12.1,2.8,18.5,2.8c8.6,0,16.8-1.7,24.2-4.9
+        c11.2-4.7,20.7-12.6,27.4-22.5c3.4-5,6-10.5,7.8-16.3c1.8-5.9,2.8-12.1,2.8-18.5c0-8.6-1.7-16.8-4.9-24.2
+        C1192.7,555.2,1184.8,545.7,1174.9,539z M1169.8,603.1c-2.4,5.8-6.5,10.7-11.7,14.2c-2.6,1.7-5.4,3.1-8.4,4.1
+        c-3,0.9-6.2,1.4-9.6,1.4c-4.5,0-8.7-0.9-12.6-2.5c-5.8-2.4-10.7-6.5-14.2-11.7c-1.7-2.6-3.1-5.4-4.1-8.4c-0.9-3-1.4-6.2-1.4-9.6
+        c0-4.5,0.9-8.7,2.5-12.6c2.4-5.8,6.5-10.7,11.7-14.2c2.6-1.7,5.4-3.1,8.4-4.1c3-0.9,6.2-1.4,9.6-1.4c4.5,0,8.7,0.9,12.6,2.5
+        c5.8,2.4,10.7,6.5,14.2,11.7c1.7,2.6,3.1,5.4,4.1,8.4c0.9,3,1.4,6.2,1.4,9.6C1172.3,595.1,1171.4,599.3,1169.8,603.1z"/>
+    <path fill="#000000" d="M1804.9,1802.5c-5-3.4-10.5-6-16.3-7.8c-5.9-1.8-12.1-2.8-18.5-2.8c-8.6,0-16.8,1.7-24.2,4.9
+        c-11.2,4.7-20.7,12.6-27.4,22.5c-3.4,5-6,10.5-7.8,16.3c-1.8,5.9-2.8,12.1-2.8,18.5c0,8.6,1.7,16.8,4.9,24.2
+        c4.7,11.2,12.6,20.7,22.5,27.4c5,3.4,10.5,6,16.3,7.8c5.9,1.8,12.1,2.8,18.5,2.8c8.6,0,16.8-1.7,24.2-4.9
+        c11.2-4.7,20.7-12.6,27.4-22.5c3.4-5,6-10.5,7.8-16.3c1.8-5.9,2.8-12.1,2.8-18.5c0-8.6-1.7-16.8-4.9-24.2
+        C1822.7,1818.7,1814.8,1809.3,1804.9,1802.5z M1799.8,1866.7c-2.4,5.8-6.5,10.7-11.7,14.2c-2.6,1.7-5.4,3.1-8.4,4.1
+        c-3,0.9-6.2,1.4-9.6,1.4c-4.5,0-8.7-0.9-12.6-2.5c-5.8-2.4-10.7-6.5-14.2-11.7c-1.7-2.6-3.1-5.4-4.1-8.4c-0.9-3-1.4-6.2-1.4-9.6
+        c0-4.5,0.9-8.7,2.5-12.6c2.4-5.8,6.5-10.7,11.7-14.2c2.6-1.7,5.4-3.1,8.4-4.1c3-0.9,6.2-1.4,9.6-1.4c4.5,0,8.7,0.9,12.6,2.5
+        c5.8,2.4,10.7,6.5,14.2,11.7c1.7,2.6,3.1,5.4,4.1,8.4c0.9,3,1.4,6.2,1.4,9.6C1802.3,1858.7,1801.4,1862.9,1799.8,1866.7z"/>
+    <path fill="#000000" d="M914.7,1411.4c-5-3.4-10.5-6-16.3-7.8c-5.9-1.8-12.1-2.8-18.5-2.8c-8.6,0-16.8,1.7-24.2,4.9
+        c-11.2,4.7-20.7,12.6-27.4,22.5c-3.4,5-6,10.5-7.8,16.3c-1.8,5.9-2.8,12.1-2.8,18.5c0,8.6,1.7,16.8,4.9,24.2
+        c4.7,11.2,12.6,20.7,22.5,27.4c5,3.4,10.5,6,16.3,7.8c5.9,1.8,12.1,2.8,18.5,2.8c8.6,0,16.8-1.7,24.2-4.9
+        c11.2-4.7,20.7-12.6,27.4-22.5c3.4-5,6-10.5,7.8-16.3c1.8-5.9,2.8-12.1,2.8-18.5c0-8.6-1.7-16.8-4.9-24.2
+        C932.5,1427.6,924.6,1418.1,914.7,1411.4z M909.6,1475.6c-2.4,5.8-6.5,10.7-11.7,14.2c-2.6,1.7-5.4,3.1-8.4,4.1
+        c-3,0.9-6.2,1.4-9.6,1.4c-4.5,0-8.7-0.9-12.6-2.5c-5.8-2.4-10.7-6.5-14.2-11.7c-1.7-2.6-3.1-5.4-4.1-8.4c-0.9-3-1.4-6.2-1.4-9.6
+        c0-4.5,0.9-8.7,2.5-12.6c2.4-5.8,6.5-10.7,11.7-14.2c2.6-1.7,5.4-3.1,8.4-4.1c3-0.9,6.2-1.4,9.6-1.4c4.5,0,8.7,0.9,12.6,2.5
+        c5.8,2.4,10.7,6.5,14.2,11.7c1.7,2.6,3.1,5.4,4.1,8.4c0.9,3,1.4,6.2,1.4,9.6C912.1,1467.6,911.2,1471.8,909.6,1475.6z"/>
+    <path fill="#000000" d="M1946.9,566.3c-4.7-11.2-12.6-20.7-22.5-27.4c-5-3.4-10.5-6-16.3-7.8c-5.9-1.8-12.1-2.8-18.5-2.8
+        c-8.6,0-16.8,1.7-24.2,4.9c-11.2,4.7-20.7,12.6-27.4,22.5c-3.4,5-6,10.5-7.8,16.3c-1.8,5.9-2.8,12.1-2.8,18.5
+        c0,8.6,1.7,16.8,4.9,24.2c4.7,11.2,12.6,20.7,22.5,27.4c5,3.4,10.5,6,16.3,7.8c5.9,1.8,12.1,2.8,18.5,2.8c8.6,0,16.8-1.7,24.2-4.9
+        c11.2-4.7,20.7-12.6,27.4-22.5c3.4-5,6-10.5,7.8-16.3c1.8-5.9,2.8-12.1,2.8-18.5C1951.8,582,1950,573.8,1946.9,566.3z
+         M1919.3,603.1c-2.4,5.8-6.5,10.7-11.7,14.2c-2.6,1.7-5.4,3.1-8.4,4.1c-3,0.9-6.2,1.4-9.6,1.4c-4.5,0-8.7-0.9-12.6-2.5
+        c-5.8-2.4-10.7-6.5-14.2-11.7c-1.7-2.6-3.1-5.4-4.1-8.4c-0.9-3-1.4-6.2-1.4-9.6c0-4.5,0.9-8.7,2.5-12.6c2.4-5.8,6.5-10.7,11.7-14.2
+        c2.6-1.7,5.4-3.1,8.4-4.1c3-0.9,6.2-1.4,9.6-1.4c4.5,0,8.7,0.9,12.6,2.5c5.8,2.4,10.7,6.5,14.2,11.7c1.7,2.6,3.1,5.4,4.1,8.4
+        c0.9,3,1.4,6.2,1.4,9.6C1921.8,595.1,1920.9,599.3,1919.3,603.1z"/>
+    <path fill="#000000" d="M292.8,206.9c-5-3.4-10.5-6-16.3-7.8c-5.9-1.8-12.1-2.8-18.5-2.8c-8.6,0-16.8,1.7-24.2,4.9
+        c-11.2,4.7-20.7,12.6-27.4,22.5c-3.4,5-6,10.5-7.8,16.3c-1.8,5.9-2.8,12.1-2.8,18.5c0,8.6,1.7,16.8,4.9,24.2
+        c4.7,11.2,12.6,20.7,22.5,27.4c5,3.4,10.5,6,16.3,7.8c5.9,1.8,12.1,2.8,18.5,2.8c8.6,0,16.8-1.7,24.2-4.9
+        c11.2-4.7,20.7-12.6,27.4-22.5c3.4-5,6-10.5,7.8-16.3c1.8-5.9,2.8-12.1,2.8-18.5c0-8.6-1.7-16.8-4.9-24.2
+        C310.6,223.1,302.7,213.6,292.8,206.9z M287.7,271.1c-2.4,5.8-6.5,10.7-11.7,14.2c-2.6,1.7-5.4,3.1-8.4,4.1c-3,0.9-6.2,1.4-9.6,1.4
+        c-4.5,0-8.7-0.9-12.6-2.5c-5.8-2.4-10.7-6.5-14.2-11.7c-1.7-2.6-3.1-5.4-4.1-8.4c-0.9-3-1.4-6.2-1.4-9.6c0-4.5,0.9-8.7,2.5-12.6
+        c2.4-5.8,6.5-10.7,11.7-14.2c2.6-1.7,5.4-3.1,8.4-4.1c3-0.9,6.2-1.4,9.6-1.4c4.5,0,8.7,0.9,12.6,2.5c5.8,2.4,10.7,6.5,14.2,11.7
+        c1.7,2.6,3.1,5.4,4.1,8.4c0.9,3,1.4,6.2,1.4,9.6C290.2,263.1,289.3,267.3,287.7,271.1z"/>
+    <path fill="#000000" d="M464.8,1091.9c-2-1.4-4.3-2.5-6.7-3.2c-2.4-0.7-5-1.1-7.6-1.1c-3.5,0-6.9,0.7-9.9,2
+        c-4.6,1.9-8.5,5.2-11.2,9.2c-1.4,2-2.5,4.3-3.2,6.7c-0.7,2.4-1.1,5-1.1,7.6c0,3.5,0.7,6.9,2,9.9c1.9,4.6,5.2,8.5,9.2,11.2
+        c2,1.4,4.3,2.5,6.7,3.2c2.4,0.7,5,1.1,7.6,1.1c3.5,0,6.9-0.7,9.9-2c4.6-1.9,8.5-5.2,11.2-9.2c1.4-2,2.5-4.3,3.2-6.7
+        c0.7-2.4,1.1-5,1.1-7.6c0-3.5-0.7-6.9-2-9.9C472,1098.5,468.8,1094.6,464.8,1091.9z M450.5,1113L450.5,1113l4.3-1.3L450.5,1113z
+         M450.5,1113L450.5,1113l-1.3-4.3L450.5,1113z M450.5,1113L450.5,1113l-3.7,2.5L450.5,1113z M450.5,1113l2.5,3.7L450.5,1113
+        l4.1,1.8L450.5,1113z"/>
+    <path fill="#000000" d="M1191.1,1775.3c-2-1.4-4.3-2.5-6.7-3.2c-2.4-0.7-5-1.1-7.6-1.1c-3.5,0-6.9,0.7-9.9,2
+        c-4.6,1.9-8.5,5.2-11.2,9.2c-1.4,2-2.5,4.3-3.2,6.7c-0.7,2.4-1.1,5-1.1,7.6c0,3.5,0.7,6.9,2,9.9c1.9,4.6,5.2,8.5,9.2,11.2
+        c2,1.4,4.3,2.5,6.7,3.2c2.4,0.7,5,1.1,7.6,1.1c3.5,0,6.9-0.7,9.9-2c4.6-1.9,8.5-5.2,11.2-9.2c1.4-2,2.5-4.3,3.2-6.7
+        c0.7-2.4,1.1-5,1.1-7.6c0-3.5-0.7-6.9-2-9.9C1198.4,1781.9,1195.2,1778.1,1191.1,1775.3z M1176.9,1796.4L1176.9,1796.4l1.8-4.1
+        L1176.9,1796.4z M1176.9,1796.4L1176.9,1796.4l-2.5-3.7L1176.9,1796.4z M1176.9,1796.4L1176.9,1796.4l1.3,4.3L1176.9,1796.4z"/>
+    <path fill="#000000" d="M1287.3,200.8c-2-1.4-4.3-2.5-6.7-3.2c-2.4-0.7-5-1.1-7.6-1.1c-3.5,0-6.9,0.7-9.9,2
+        c-4.6,1.9-8.5,5.2-11.2,9.2c-1.4,2-2.5,4.3-3.2,6.7c-0.7,2.4-1.1,5-1.1,7.6c0,3.5,0.7,6.9,2,9.9c1.9,4.6,5.2,8.5,9.2,11.2
+        c2,1.4,4.3,2.5,6.7,3.2c2.4,0.7,5,1.1,7.6,1.1c3.5,0,6.9-0.7,9.9-2c4.6-1.9,8.5-5.2,11.2-9.2c1.4-2,2.5-4.3,3.2-6.7
+        c0.7-2.4,1.1-5,1.1-7.6c0-3.5-0.7-6.9-2-9.9C1294.5,207.4,1291.3,203.6,1287.3,200.8z M1273,221.9L1273,221.9l1.8-4.1L1273,221.9z
+         M1273,222L1273,222l-4.3,1.3L1273,222z M1273,222L1273,222l-1.8,4.1L1273,222z M1273,222L1273,222l1.3,4.3L1273,222z M1273,222
+        L1273,222l4.1,1.8L1273,222z"/>
+    <path fill="#000000" d="M1590.1,770.2c-2-1.4-4.3-2.5-6.7-3.2c-2.4-0.7-5-1.1-7.6-1.1c-3.5,0-6.9,0.7-9.9,2
+        c-4.6,1.9-8.5,5.2-11.2,9.2c-1.4,2-2.5,4.3-3.2,6.7c-0.7,2.4-1.1,5-1.1,7.6c0,3.5,0.7,6.9,2,9.9c1.9,4.6,5.2,8.5,9.2,11.2
+        c2,1.4,4.3,2.5,6.7,3.2c2.4,0.7,5,1.1,7.6,1.1c3.5,0,6.9-0.7,9.9-2c4.6-1.9,8.5-5.2,11.2-9.2c1.4-2,2.5-4.3,3.2-6.7
+        c0.7-2.4,1.1-5,1.1-7.6c0-3.5-0.7-6.9-2-9.9C1597.4,776.8,1594.2,772.9,1590.1,770.2z M1575.9,791.3L1575.9,791.3l4.3-1.3
+        L1575.9,791.3z M1575.9,791.3L1575.9,791.3l-2.5-3.7L1575.9,791.3z M1575.9,791.3L1575.9,791.3l-1.8,4.1L1575.9,791.3z
+         M1575.9,791.3l2.5,3.7L1575.9,791.3l4.1,1.8L1575.9,791.3z"/>
+    <path fill="#000000" d="M1111.2,994.5l-86.4-5.9c-5.3-0.4-10.5,2.2-13.5,6.6c-3,4.4-3.4,10.2-1,15l38.1,77.8
+        c2.4,4.8,7.1,8,12.4,8.4s10.5-2.2,13.5-6.6l48.3-71.9c3-4.4,3.4-10.2,1-15S1116.6,994.9,1111.2,994.5z M1064,1051.4l-15.2-31.1
+        l34.6,2.4L1064,1051.4z"/>
+    <path fill="#000000" d="M244.5,827.9c5.1,1.7,10.7,0.6,14.7-3c4-3.5,5.8-9,4.8-14.2l-17.1-84.9c-1.1-5.3-4.8-9.5-9.9-11.3
+        s-10.7-0.6-14.7,3l-65,57.2c-4,3.5-5.8,9-4.8,14.2s4.8,9.5,9.9,11.3L244.5,827.9z M222.6,757.2l6.8,34l-32.8-11.1L222.6,757.2z"/>
+    <path fill="#000000" d="M256.2,1491.8l-77.8-38.1c-4.8-2.4-10.5-2-15,1s-7,8.1-6.6,13.5l5.9,86.4c0.4,5.3,3.5,10.1,8.4,12.5
+        c4.8,2.4,10.5,2,15-1l71.9-48.3c4.4-3,7-8.1,6.6-13.5C264.2,1498.9,261,1494.1,256.2,1491.8z M190.9,1526.6l-2.3-34.6l31.1,15.3
+        L190.9,1526.6z"/>
+    <path fill="#000000" d="M939.8,189.8l-66.4-55.6c-4.1-3.4-9.7-4.4-14.8-2.6c-5,1.8-8.7,6.2-9.6,11.5l-15,85.3
+        c-0.9,5.3,1,10.6,5.1,14.1c4.1,3.4,9.7,4.4,14.8,2.6l81.3-29.7c5-1.8,8.7-6.2,9.6-11.5S943.9,193.2,939.8,189.8z M868.1,208l6-34.1
+        l26.6,22.2L868.1,208z"/>
+    <path fill="#000000" d="M1752,1163.4l-38.5,77.6c-2.4,4.8-2,10.5,0.9,15c3,4.5,8.1,7,13.4,6.7l86.4-5.4c5.3-0.3,10.1-3.5,12.5-8.3
+        c2.4-4.8,2-10.5-0.9-15l-47.9-72.2c-3-4.5-8.1-7-13.4-6.7C1759.1,1155.5,1754.3,1158.6,1752,1163.4z M1751.8,1231.1l15.4-31
+        l19.2,28.9L1751.8,1231.1z"/>
+</g>
+</svg>`;
+
+    public static getURL(color = "#000000") {
+        const blob = new Blob([
+            this.svg.replaceAll("#000000", color)
+        ], {
+            type: "image/svg+xml"
+        });
+
+        const url = URL.createObjectURL(blob);
+
+        return {
+            url,
+            revoke: () => URL.revokeObjectURL(url)
+        };
+    }
+}
 
 function Wave({canvasRef, isVisible}: {canvasRef: React.RefObject<HTMLCanvasElement | null>; isVisible: boolean;}) {
     const accessibility = React.use(AccessibilityContext);
@@ -54,8 +171,32 @@ function Wave({canvasRef, isVisible}: {canvasRef: React.RefObject<HTMLCanvasElem
                 alpha: 0.5 / (index + 1),
                 counter: 0,
                 direction: Math.random() < 0.5 ? 1 : -1,
+
+                imgSpeed: 20 + Math.random() * 25,
+                imgDirection: Math.random() < 0.5 ? 1 : -1,
+                imgCounter: 0,
+                imgScale: 1 / (index / 1.5),
+                imgYOffset: (Math.random() * 100) - 50
             };
         });
+
+        const style = getComputedStyle(canvas);
+
+        const {url, revoke} = FloatingStore.getURL(style.getPropertyValue("--bd-wave-pattern") || "#FFFFFF");
+
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = url;
+
+        let imgLoaded = false;
+        let bitMap: ImageBitmap;
+        img.onload = async () => {
+            bitMap = await window.createImageBitmap(img, {
+                resizeHeight: 2000,
+                resizeWidth: 2000
+            });
+            imgLoaded = true;
+        };
 
         function frame() {
             id = requestAnimationFrame(frame);
@@ -85,15 +226,36 @@ function Wave({canvasRef, isVisible}: {canvasRef: React.RefObject<HTMLCanvasElem
             ctx.resetTransform?.();
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-            const color = getComputedStyle(canvas).getPropertyValue("--bd-brand") || "#3E82E5";
+            const fillStyle: CanvasFillStrokeStyles["fillStyle"] = style.getPropertyValue("--bd-brand") || "#3E82E5";
+            // const background = style.getPropertyValue("--bd-wave-background");
+            // if (background) {
+            //     const grad = ctx.createLinearGradient(
+            //         0,
+            //         0,
+            //         canvas.width,
+            //         0
+            //     );
+
+            //     const c = background.split(",").join(" ").split(" ").filter(m => m);
+
+            //     for (let index = 0; index < c.length; index++) {
+            //         grad.addColorStop(index / c.length, c[index]);
+            //     }
+
+            //     fillStyle = grad;
+            // }
+            // else {
+            //     fillStyle = style.getPropertyValue("--bd-brand") || "#3E82E5";
+            // }
+
+            ctx.clearRect(0, 0, width, height);
 
             if (reducedMotion.current) {
-                ctx.clearRect(0, 0, width, height);
 
                 for (const wave of waves) {
                     wave.counter = (wave.counter + wave.speed * wave.direction * delta) % wave.wavelength;
 
-                    ctx.fillStyle = color;
+                    ctx.fillStyle = fillStyle;
                     ctx.globalAlpha = wave.alpha;
 
                     ctx.fillRect(0, 0, width, height);
@@ -108,18 +270,23 @@ function Wave({canvasRef, isVisible}: {canvasRef: React.RefObject<HTMLCanvasElem
 
             for (const wave of waves) {
                 wave.counter = (wave.counter + wave.speed * wave.direction * delta) % wave.wavelength;
+                if (imgLoaded) {
+                    wave.imgCounter = (wave.imgCounter + wave.imgSpeed * wave.imgDirection * delta) % (bitMap.width * wave.imgScale);
+                }
+
                 const waveY = baseWaveY + wave.waveY;
 
+                ctx.save();
                 ctx.beginPath();
                 ctx.globalAlpha = wave.alpha;
-                ctx.fillStyle = color;
+                ctx.fillStyle = fillStyle;
 
                 ctx.moveTo(0, 0);
                 ctx.lineTo(0, waveY);
 
                 for (
                     let x = -wave.wavelength * padding - wave.counter;
-                    x <= canvas.width + wave.wavelength * (padding + 1); // increased range here
+                    x <= canvas.width + wave.wavelength * padding;
                     x += wave.wavelength
                 ) {
                     const px = x - wave.phaseOffset;
@@ -142,12 +309,92 @@ function Wave({canvasRef, isVisible}: {canvasRef: React.RefObject<HTMLCanvasElem
                 ctx.lineTo(width, 0);
                 ctx.closePath();
                 ctx.fill();
+
+                ctx.clip();
+
+                if (imgLoaded) {
+                    const accHeight = Math.min(height, bitMap.height) * wave.imgScale;
+
+                    const scale = accHeight / Math.max(height, bitMap.height);
+                    const accWidth = bitMap.width * scale;
+
+
+                    const m = Math.ceil(width / accWidth) + 1;
+
+                    for (let index = 0; index < m; index++) {
+                        ctx.drawImage(
+                            bitMap,
+                            wave.imgCounter + ((accWidth * -wave.direction) * index),
+                            wave.imgYOffset,
+                            accWidth, accHeight
+                        );
+                    }
+                    for (let index = 0; index < m; index++) {
+                        ctx.drawImage(
+                            bitMap,
+                            wave.imgCounter + ((accWidth * wave.direction) * index),
+                            wave.imgYOffset,
+                            accWidth, accHeight
+                        );
+                    }
+                }
+
+                ctx.restore();
             }
+
+            // Large texture across (slow?)
+            // ctx.save();
+            // ctx.beginPath();
+
+            // for (const wave of waves) {
+            //     const waveY = baseWaveY + wave.waveY;
+
+            //     ctx.moveTo(0, 0);
+            //     ctx.lineTo(0, waveY);
+
+            //     for (
+            //         let x = -wave.wavelength * padding - wave.counter;
+            //         x <= canvas.width + wave.wavelength * padding;
+            //         x += wave.wavelength
+            //     ) {
+            //         const px = x - wave.phaseOffset;
+
+            //         ctx.quadraticCurveTo(
+            //             px + wave.wavelength / 4,
+            //             waveY - wave.waveHeight,
+            //             px + wave.wavelength / 2,
+            //             waveY,
+            //         );
+            //         ctx.quadraticCurveTo(
+            //             px + wave.wavelength * 0.75,
+            //             waveY + wave.waveHeight,
+            //             px + wave.wavelength,
+            //             waveY,
+            //         );
+            //     }
+
+            //     ctx.lineTo(width, waveY);
+            //     ctx.lineTo(width, 0);
+            // }
+
+            // ctx.clip();
+
+            // if (imgLoaded) {
+            //     ctx.globalAlpha = 0.125;
+            //     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            // }
+
+            // ctx.restore();
         }
 
         frame();
 
-        return () => cancelAnimationFrame(id);
+        return () => {
+            cancelAnimationFrame(id);
+            revoke();
+
+            bitMap?.close();
+        };
     }, []);
 
     return (
@@ -158,6 +405,35 @@ function Wave({canvasRef, isVisible}: {canvasRef: React.RefObject<HTMLCanvasElem
                 ref.current = v;
             }}
         />
+    );
+}
+
+function RedirectCard({icon, title, description, to, button}: {
+    icon: React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>,
+    title: string,
+    description: string,
+    to: string,
+    button?: string;
+}) {
+    return (
+        <div className="bd-home-redirect">
+            <div className="bd-home-redirect-icon">
+                {React.createElement(icon, {width: 32, height: 32})}
+            </div>
+
+            <div className="bd-home-redirect-content">
+                <div className="bd-home-redirect-title">
+                    {title}
+                </div>
+                <div className="bd-home-redirect-description">
+                    {description}
+                </div>
+
+                <Button onClick={() => routemanager.transitionTo(to)}>
+                    {button || "Visit"}
+                </Button>
+            </div>
+        </div>
     );
 }
 
@@ -203,7 +479,7 @@ function HomePage() {
                             icon={Rabbit}
                             tooltip="Rabbit"
                             onClick={() => {}}
-                            badgePosition="bottom"
+                            badgePosition="top"
                             showBadge
                         />
                         <HeaderBar.Icon
@@ -240,7 +516,26 @@ function HomePage() {
                 </div>
             </div>
             <div className="bd-content" onScroll={onScroll}>
-                <div className="bd-home-sep" />
+                <div className="bd-home-redirects">
+                    <RedirectCard
+                        title="Bird"
+                        icon={Bird}
+                        description="A tab about Bird's and Bird's alone"
+                        to="/plugins"
+                    />
+                    <RedirectCard
+                        title="Rabbit"
+                        icon={Rabbit}
+                        description="A tab about Rabbit's and Rabbit's alone"
+                        to="/plugins"
+                    />
+                    <RedirectCard
+                        title="Squirrel"
+                        icon={Squirrel}
+                        description="A tab about Squirrel's and Squirrel's alone"
+                        to="/plugins"
+                    />
+                </div>
 
                 {Array.from({length: 100}, () =>
                     <div style={{color: "red"}}>123</div>

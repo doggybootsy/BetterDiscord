@@ -179,10 +179,7 @@
 
 .bd-home + .bd-content {
     z-index: 1;
-}
-
-.bd-home-sep {
-    flex: 1 0 calc(300px - 24px - 48px);
+    padding-top: calc(300px - 48px);
 }
 
 .bd-home > :where(div, canvas) {
@@ -212,3 +209,46 @@
 /* [data-dark-mode="true"] :where(.bd-home-logo, .bd-home-greeting) {
     color: black;
 } */
+
+.bd-home-redirects {
+    gap: 24px;
+    display: flex;
+    justify-content: center;
+    flex-flow: row;
+    flex-wrap: wrap;
+    margin: 8px 0;
+}
+
+.bd-home-redirect {
+    background: var(--background-base-lowest);
+    padding: 8px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    width: 300px;
+}
+
+.bd-home-redirect-icon {
+    color: #fff;
+    background: var(--background-base-low);
+    padding: 16px;
+    border-radius: 50%;
+}
+
+.bd-home-redirect-title {
+    color: var(--header-primary);
+}
+
+.bd-home-redirect-description {
+    color: var(--header-muted);
+}
+
+.bd-home-redirect-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
