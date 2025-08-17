@@ -2,15 +2,51 @@ import React from "react";
 
 import {BasePage} from "./Page";
 import {CustomCSS} from "@builtins/builtins";
-import CSSEditor from "@ui/customcss/csseditor";
 import Header from "./Header";
-import {ExternalLinkIcon, PencilIcon, RotateCwIcon, SaveIcon} from "lucide-react";
+import {ExternalLinkIcon, RotateCwIcon, SaveIcon, PencilIcon} from "lucide-react";
 import {t} from "@common/i18n";
 import Flex from "@ui/base/flex";
 import Text from "@ui/base/text";
 import Switch from "@ui/settings/components/switch";
+import Editor from "@ui/customcss/editor";
+import Events from "@modules/emitter";
+import Settings from "@stores/settings";
+import {useInternalStore} from "@ui/hooks";
 
 function CustomCSSPage() {
+    const editorRef = React.useRef<{
+        value: string;
+    }>(null);
+    const [hasUnsavedChanges, setUnsaved] = React.useState(false);
+
+    const updateEditor = React.useCallback((newCSS: string) => {
+        if (editorRef.current) {
+            editorRef.current.value = newCSS;
+        }
+    }, [editorRef]);
+
+    React.useEffect(() => {
+        Events.on("customcss-updated", updateEditor);
+        return () => void Events.off("customcss-updated", updateEditor);
+    }, [updateEditor]);
+
+    const toggleLiveUpdate = React.useCallback((checked: boolean) => Settings.set("settings", "customcss", "liveUpdate", checked), []);
+    const updateCss = React.useCallback(() => CustomCSS.insertCSS(editorRef.current!.value), []);
+    const popoutNative = React.useCallback(() => CustomCSS.openNative(), []);
+    const popout = React.useCallback(() => CustomCSS.openDetached(editorRef.current!.value), []);
+
+    const liveUpdate = useInternalStore(Settings, () => Settings.get<boolean>("settings", "customcss", "liveUpdate"));
+
+    const onChange = React.useCallback(() => {
+        CustomCSS.onChange(editorRef.current!.value);
+        setUnsaved(!liveUpdate);
+    }, [liveUpdate]);
+
+    const saveCss = React.useCallback(() => {
+        CustomCSS.saveCSS(editorRef.current!.value);
+        setUnsaved(false);
+    }, []);
+
     return (
         <BasePage>
             <Header
@@ -18,12 +54,16 @@ function CustomCSSPage() {
                     <>
                         <Flex align={Flex.Align.CENTER} style={{gap: "10px"}}>
                             <Text>{t("Collections.settings.customcss.liveUpdate.name")}</Text>
-                            <Switch onChange={() => {}} value={true} />
+                            <Switch
+                                onChange={toggleLiveUpdate}
+                                value={liveUpdate}
+                                internalState={false}
+                            />
                         </Flex>
                         <Header.Icon
                             icon={ExternalLinkIcon}
                             tooltip={t("CustomCSS.openDetached")}
-                            onClick={() => {}}
+                            onClick={popout}
                         />
                     </>
                 }
@@ -31,27 +71,28 @@ function CustomCSSPage() {
                 <Header.Icon
                     icon={RotateCwIcon}
                     tooltip={t("CustomCSS.update")}
-                    onClick={() => {}}
+                    onClick={updateCss}
                 />
                 <Header.Icon
                     icon={SaveIcon}
                     tooltip={t("CustomCSS.save")}
-                    onClick={() => {}}
+                    onClick={saveCss}
+                    badgePosition="bottom"
+                    showBadge={hasUnsavedChanges}
                 />
                 <Header.Icon
                     icon={PencilIcon}
                     tooltip={t("CustomCSS.openNative")}
-                    onClick={() => {}}
+                    onClick={popoutNative}
                 />
             </Header>
-            {React.createElement(CSSEditor, {
-                css: CustomCSS.savedCss,
-                save: CustomCSS.saveCSS.bind(CustomCSS),
-                update: CustomCSS.insertCSS.bind(CustomCSS),
-                openNative: CustomCSS.openNative.bind(CustomCSS),
-                openDetached: CustomCSS.openDetached.bind(CustomCSS),
-                onChange: CustomCSS.onChange.bind(CustomCSS)
-            })}
+            <Editor
+                ref={editorRef}
+                id="bd-customcss-editor"
+                onChange={onChange}
+                value={CustomCSS.savedCss}
+                controls={[]}
+            />
         </BasePage>
     );
 }

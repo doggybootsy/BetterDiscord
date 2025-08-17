@@ -1,31 +1,19 @@
 const HOSTNAME = "betterdiscord.app";
-/**
- * The current API version to use
- * @type {`v${bigint}` | "latest"}
- */
-const API_VERSION = "v3";
 
-/**
- * @param  {string[]} paths
- */
+const API_VERSION: `v${bigint}` | "latest" = "v3";
+
 const join = (...paths: string[]) => {
     const path = paths.map(($path) => $path.match(/\/*(.+)\/*/)?.[1]).filter(Boolean).join("/");
 
     return `https://${HOSTNAME}/${path}`;
 };
 
-/**
- * @param  {string[]} paths
- */
 const apiJoin = (...paths: string[]) => {
     const path = paths.map(($path) => $path.match(/\/*(.+)\/*/)?.[1]).filter(Boolean).join("/");
 
     return `https://api.${HOSTNAME}/${API_VERSION}/${path}`;
 };
-/**
- * @param {string} type
- * @returns {(name: string) => string}
- */
+
 const makePage = (type: string) => (name: string) => join(`${type}/${encodeURIComponent(name)}`);
 
 /**
@@ -125,7 +113,7 @@ export default class Web {
         addon: (idOrName: string) => apiJoin(`/store/${encodeURIComponent(idOrName)}`),
 
         tags: {
-            plugin: [
+            plugin: <const>[
                 "fun",
                 "roles",
                 "activity",
@@ -150,7 +138,7 @@ export default class Web {
                 "text",
                 "voice"
             ],
-            theme: [
+            theme: <const>[
                 "flat",
                 "transparent",
                 "layout",

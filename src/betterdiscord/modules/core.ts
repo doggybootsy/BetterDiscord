@@ -71,6 +71,15 @@ export default new class Core {
         Logger.log("Startup", "Waiting for connection...");
         await this.waitForConnection();
 
+        if (location.search.startsWith("?__bd_dashboard_path__=")) {
+            requestAnimationFrame(() => {
+                RouteManager.transitionTo(decodeURIComponent(location.search.replace("?__bd_dashboard_path__=", "")));
+                requestAnimationFrame(() => {
+                    RouteManager.transitionTo(decodeURIComponent(location.search.replace("?__bd_dashboard_path__=", "")));
+                });
+            });
+        }
+
         Logger.log("Startup", "Initializing Editor");
         await Editor.initialize();
 

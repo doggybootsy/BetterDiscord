@@ -3,20 +3,50 @@ import Patcher from "./patcher";
 import {findInTree} from "@common/utils";
 import React from "react";
 import BetterDiscordRoute from "@ui/routes";
-import type {ExtractRouteParams, RouteComponentProps} from "react-router";
+import type {ExtractRouteParams, RouteProps} from "react-router";
 import Settings from "@stores/settings";
 import Sidebar from "@ui/routes/sidebar";
 import Store from "@stores/base";
+import {useInternalStore} from "@ui/hooks";
+import {shallowEqual} from "fast-equals";
 
 const getRoutes = () => [
     `/betterdiscord/:collection(${Settings.collections.map((collection) => collection.id).join("|")})`,
-    "/betterdiscord/:addon(plugins|themes)/store?",
+    "/betterdiscord/store/:addon(plugins|themes)/:id",
+    "/betterdiscord/store/:addon(plugins|themes)",
+    "/betterdiscord/:addon(plugins)/:id",
     "/betterdiscord/:addon(plugins|themes)",
     "/betterdiscord/custom-css",
     "/betterdiscord/updates",
     "/betterdiscord",
     "/betterdiscord/*"
 ] as const satisfies Array<`/betterdiscord${string}`>;
+
+const useRoutes = () => useInternalStore(Settings, getRoutes, [], shallowEqual);
+
+interface RoutesComponent extends React.Component {
+    _bdRoutes: ReturnType<typeof getRoutes>;
+}
+
+function connectRoutes(component: RoutesComponent) {
+    if (!component._bdRoutes) {
+        component._bdRoutes = getRoutes();
+
+        const listener = () => {
+            component._bdRoutes = getRoutes();
+            component.forceUpdate();
+        };
+
+        Settings.addChangeListener(listener);
+
+        const componentWillUnmount = Patcher.after("connect-routes", component, "componentWillUnmount", () => {
+            componentWillUnmount?.();
+            Settings.removeChangeListener(listener);
+        });
+    }
+
+    return component._bdRoutes;
+}
 
 export type RouteParams = ExtractRouteParams<ReturnType<typeof getRoutes>[number], string>;
 
@@ -34,12 +64,16 @@ export default new class RouteManager extends Store {
 
     private _transitionTo?: (path: string) => void;
     public transitionTo(path: string) {
-        this._transitionTo ??= getByStrings(["transitionTo -"], {searchExports: true});
+        this._transitionTo ??= getByStrings(["transitionTo - Transitioning to"], {searchExports: true});
 
-        if (path === "/home" || path === "/" || path === "") {
+        if (path.startsWith("/betterdiscord")) {
+            path = path.replace("/betterdiscord", "");
+        }
+
+        if (path === "/" || path === "") {
             path = "/betterdiscord";
         }
-        else {
+        else if (!(path.startsWith("?") || path.startsWith("#"))) {
             path = `/betterdiscord/${path.slice(1)}`;
         }
 
@@ -53,29 +87,35 @@ export default new class RouteManager extends Store {
 
         Patcher.after("betterdiscord-router", Router!.prototype, "render", (that, args, res) => {
             const channelRouteProps: {
-                path: string[];
+                path: Array<Array<string | string[]>>;
             } = findInTree(res, (node) => node && node.path?.length > 5, {
                 walkable: ["children", "props"]
             });
 
-            channelRouteProps.path = Array.from(new Set([
-                ...getRoutes(),
+            const routes = connectRoutes(that as RoutesComponent);
+
+
+            channelRouteProps.path = [
+                routes,
                 ...channelRouteProps.path
-            ]));
+            ];
         });
     }
 
-    private Route?: React.FC<{
-        path: readonly string[],
+    private Route?: React.ComponentClass<RouteProps & {
         disableTrack: boolean;
-        render: React.ComponentType<RouteComponentProps>;
     }>;
 
     private handleAddingRoutes(res: React.ReactNode) {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const routes = useRoutes();
         const {children} = findInTree(res as any, (node) => node && node.children?.length > 5, {walkable: ["children", "props"]}) as {children: React.ReactNode[];};
 
         const bdRoute = children.findIndex((node) => React.isValidElement(node) && node.key === "BetterDiscord");
-        if (bdRoute !== -1) return;
+        if (bdRoute !== -1) {
+            // @ts-expect-error IDK!
+            children[bdRoute].props.path = routes;
+        }
 
         if (typeof this.Route !== "function") {
             const Router = children.find((node) => React.isValidElement(node) && "path" in (node.props as {
@@ -95,11 +135,12 @@ export default new class RouteManager extends Store {
 
         children.push(
             <this.Route
-                path={getRoutes()}
-                disableTrack
+                path={routes}
                 render={(props) => (
                     <BetterDiscordRoute {...props} />
                 )}
+                exact
+                disableTrack
                 key="BetterDiscord"
             />
         );

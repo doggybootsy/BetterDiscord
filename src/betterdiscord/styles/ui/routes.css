@@ -57,6 +57,7 @@
     display: flex;
     height: var(--custom-channel-header-height);
     padding: 16px;
+    flex: 0 0 auto;
 }
 
 .bd-header h2 {
@@ -86,7 +87,7 @@
     flex: 1;
     flex-direction: column;
     gap: 2px;
-    padding: 8px;
+    padding: 8px 0 8px 8px;
 }
 
 .bd-nav-item {
@@ -127,7 +128,7 @@
 .bd-links {
     font-size: 12px;
     line-height: 16px;
-    padding: 8px 10px;
+    padding: 8px 0 8px 8px;
 }
 
 .bd-links a {
@@ -152,8 +153,56 @@
     width: 100%;
 }
 
-.bd-content-wrapper .bd-sidebar {
-    flex: 0 240px;
+.bd-sidebar-wrapper {
+    background: var(--background-gradient-high, var(--background-base-lowest));
+    box-sizing: border-box;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    user-select: none;
+}
+
+.bd-content-wrapper .bd-sidebar-wrapper {
+    flex: 0 0 240px;
+    margin-bottom: 0;
+}
+
+.bd-sidebar {
+    background: var(--background-gradient-high, var(--background-base-lowest));
+    overflow: hidden scroll;
+    margin-bottom: calc(var(--custom-app-panels-height, 0) + 8px);
+}
+
+.bd-sidebar::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.bd-sidebar::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+.bd-sidebar::-webkit-scrollbar-thumb {
+    visibility: hidden;
+    background-clip: padding-box;
+    background-color: var(--scrollbar-thin-thumb);
+    border: 2px solid transparent;
+    border-radius: 4px;
+    min-height: 40px;
+}
+
+.bd-sidebar::-webkit-scrollbar-track {
+    visibility: hidden;
+    background-color: var(--scrollbar-thin-track);
+    border: 2px solid var(--scrollbar-thin-track);
+    border-color: var(--scrollbar-thin-track);
+}
+
+.bd-sidebar:hover::-webkit-scrollbar-thumb,
+.bd-sidebar:hover::-webkit-scrollbar-track {
+    visibility: visible;
 }
 
 .bd-nav-seperator {
@@ -251,4 +300,11 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
+}
+
+.bd-store-list {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 12px;
+    justify-content: space-evenly;
 }

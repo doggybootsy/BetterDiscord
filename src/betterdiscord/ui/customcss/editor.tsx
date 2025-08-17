@@ -216,14 +216,16 @@ export default forwardRef(function CodeEditor({value, language: requestedLang = 
     const controlsRight = controls.filter(c => c.side == "right").map(buildControl.bind(null, () => editor?.getValue()));
 
     return <div id="bd-editor-panel" className={theme} ref={windowRef}>
-        <div id="bd-editor-controls">
-            <div className="controls-section controls-left">
-                {controlsLeft}
+        {controls.length && (
+            <div id="bd-editor-controls">
+                <div className="controls-section controls-left">
+                    {controlsLeft}
+                </div>
+                <div className="controls-section controls-right">
+                    {controlsRight}
+                </div>
             </div>
-            <div className="controls-section controls-right">
-                {controlsRight}
-            </div>
-        </div>
+        )}
         <div className="editor-wrapper">
             <div id={id} ref={ref} className={"editor " + theme} />
             {showingProblems && (

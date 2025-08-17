@@ -42,7 +42,7 @@ function Sidebar({fallback}: {fallback?: boolean;}) {
     }
 
     return (
-        <div className="bd-sidebar">
+        <div className="bd-sidebar-wrapper">
             <div className="bd-header">
                 <h2>BetterDiscord</h2>
                 <DiscordModules.Tooltip text={t("Modals.changelog")}>
@@ -59,43 +59,44 @@ function Sidebar({fallback}: {fallback?: boolean;}) {
                     )}
                 </DiscordModules.Tooltip>
             </div>
-            <nav className="bd-nav">
-                <NavButton
-                    route=""
-                    label="Home"
-                    icon={<Home />}
-                />
-                <Seperator />
-                {Settings.collections.map((collection) => (
+            <div className="bd-sidebar">
+                <nav className="bd-nav">
                     <NavButton
-                        route={`/${collection.id}`}
-                        label={collection.name}
-                        icon={<Cog />}
+                        route=""
+                        label="Home"
+                        icon={<Home />}
                     />
-                ))}
-                <Seperator />
-                <NavButton
-                    route="/updates"
-                    label={t("Panels.updates")}
-                    icon={<Cloudy />}
-                />
-                <Seperator />
-                <NavButton
-                    route="/custom-css"
-                    label={t("Panels.customcss")}
-                    icon={<Pencil />}
-                />
-                <NavButton
-                    route="/plugins"
-                    label={t("Panels.plugins")}
-                    icon={<PlugIcon />}
-                />
-                <NavButton
-                    route="/themes"
-                    label={t("Panels.themes")}
-                    icon={<Palette />}
-                />
-                {/* <NavButton
+                    <Seperator />
+                    {Settings.collections.map((collection) => (
+                        <NavButton
+                            route={`/${collection.id}`}
+                            label={collection.name}
+                            icon={<Cog />}
+                        />
+                    ))}
+                    <Seperator />
+                    <NavButton
+                        route="/updates"
+                        label={t("Panels.updates")}
+                        icon={<Cloudy />}
+                    />
+                    <Seperator />
+                    <NavButton
+                        route="/custom-css"
+                        label={t("Panels.customcss")}
+                        icon={<Pencil />}
+                    />
+                    <NavButton
+                        route="/plugins"
+                        label={t("Panels.plugins")}
+                        icon={<PlugIcon />}
+                    />
+                    <NavButton
+                        route="/themes"
+                        label={t("Panels.themes")}
+                        icon={<Palette />}
+                    />
+                    {/* <NavButton
                     route="/plugins/store"
                     label={t("Panels.plugins")}
                     icon={<PlugIcon />}
@@ -105,47 +106,48 @@ function Sidebar({fallback}: {fallback?: boolean;}) {
                     label={t("Panels.themes")}
                     icon={<Palette />}
                 /> */}
-                {/* <NavButton
+                    {/* <NavButton
                     route="/themes/store"
                     label="Changelog"
                     icon={<HistoryIcon />}
                 /> */}
 
-                <Seperator />
-            </nav>
-            <div className="bd-links">
-                <DiscordModules.Tooltip text="Github">
-                    {(tProps) => (
-                        <a {...tProps} href="https://github.com/BetterDiscord/BetterDiscord" target="_blank" rel="noopener noreferrer">
-                            <Github />
-                        </a>
-                    )}
-                </DiscordModules.Tooltip>
-                <DiscordModules.Tooltip text="Website">
-                    {(tProps) => (
-                        <a {...tProps} href="https://betterdiscord.app/" target="_blank" rel="noopener noreferrer">
-                            <Globe />
-                        </a>
-                    )}
-                </DiscordModules.Tooltip>
-                <DiscordModules.Tooltip text="Support Server">
-                    {(tProps) => (
-                        <a
-                            {...tProps}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => {
-                                e.preventDefault();
+                    <Seperator />
+                </nav>
+                <div className="bd-links">
+                    <DiscordModules.Tooltip text="Github">
+                        {(tProps) => (
+                            <a {...tProps} href="https://github.com/BetterDiscord/BetterDiscord" target="_blank" rel="noopener noreferrer">
+                                <Github />
+                            </a>
+                        )}
+                    </DiscordModules.Tooltip>
+                    <DiscordModules.Tooltip text="Website">
+                        {(tProps) => (
+                            <a {...tProps} href="https://betterdiscord.app/" target="_blank" rel="noopener noreferrer">
+                                <Globe />
+                            </a>
+                        )}
+                    </DiscordModules.Tooltip>
+                    <DiscordModules.Tooltip text="Support Server">
+                        {(tProps) => (
+                            <a
+                                {...tProps}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => {
+                                    e.preventDefault();
 
-                                Modals.showGuildJoinModal("0Tmfo5ZbORCRqbAd");
-                            }}
-                        >
-                            <CircleHelpIcon />
-                        </a>
-                    )}
-                </DiscordModules.Tooltip>
+                                    Modals.showGuildJoinModal("0Tmfo5ZbORCRqbAd");
+                                }}
+                            >
+                                <CircleHelpIcon />
+                            </a>
+                        )}
+                    </DiscordModules.Tooltip>
+                </div>
+                <VersionInfo />
             </div>
-            <VersionInfo />
         </div>
     );
 }

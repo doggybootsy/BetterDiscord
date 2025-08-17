@@ -16,6 +16,7 @@ import Settings from "@stores/settings";
 import Web from "@data/web";
 import AddonManager from "./addonmanager";
 import type {BdWebGuild, BdWebAddon} from "../types/betterdiscordweb";
+import type {Tags} from "@ui/routes/addons/store/shared";
 
 
 /**
@@ -112,7 +113,7 @@ class Addon {
     description: string;
     likes: number;
     downloads: number;
-    tags: string[];
+    tags: Tags[];
     thumbnail: string | null;
     releaseDate: Date;
     lastModified: Date;
@@ -391,6 +392,8 @@ class Addon {
         return this.lastModified > oneWeekAgo && this.lastModified <= now;
     }
 }
+
+export type StoreAddon = Addon;
 
 const addonStore = new class AddonStore {
     initialize() {

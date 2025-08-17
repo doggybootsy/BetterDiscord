@@ -8,6 +8,12 @@ import {Bird, Rabbit, Squirrel, type LucideProps} from "lucide-react";
 import Button from "@ui/base/button";
 import routemanager from "@modules/routemanager";
 
+// TODO: Remake the pattern things
+// - Make them be individual parts
+// - Make them like float in the wave
+// - Have friction and scaling
+// - Allow them to instantly update on color change
+
 function Logo(props: any) {
     return (
         <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 2000" enableBackground="new 0 0 2000 2000" xmlSpace="preserve">
@@ -251,7 +257,6 @@ function Wave({canvasRef, isVisible}: {canvasRef: React.RefObject<HTMLCanvasElem
             ctx.clearRect(0, 0, width, height);
 
             if (reducedMotion.current) {
-
                 for (const wave of waves) {
                     wave.counter = (wave.counter + wave.speed * wave.direction * delta) % wave.wavelength;
 
@@ -537,9 +542,9 @@ function HomePage() {
                     />
                 </div>
 
-                {Array.from({length: 100}, () =>
+                {/* {Array.from({length: 100}, () =>
                     <div style={{color: "red"}}>123</div>
-                )}
+                )} */}
             </div>
         </BasePage>
     );

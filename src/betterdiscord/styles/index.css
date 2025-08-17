@@ -95,3 +95,8 @@
     /* text-transform: capitalize; */
     cursor: pointer;
 }
+
+/* Discord does not follow its own UI style guides for the context menu icons */
+[class*="colorDefault_"][class*="focused_"]:not([class*="checkboxContainer_"]) .lucide path {
+    fill: unset;
+}

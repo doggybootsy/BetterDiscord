@@ -18,3 +18,7 @@ contextBridge.exposeInMainWorld("BetterDiscordPreload", () => {
 });
 
 init();
+
+if (location.pathname.startsWith("/betterdiscord")) {
+    location.replace(`/channels/@me?__bd_dashboard_path__=${encodeURIComponent(location.href.replace(location.origin, ""))}`);
+}

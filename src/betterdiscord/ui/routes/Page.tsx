@@ -3,6 +3,7 @@ import {useInternalStore} from "@ui/hooks";
 import RouteManager from "@modules/routemanager";
 import Sidebar from "./sidebar";
 import Header, {type HeaderIconProps, type IconProps} from "./Header";
+import {useLocation} from "./hooks";
 
 type ToolbarItem = {render: () => React.ReactNode;} | HeaderIconProps;
 
@@ -11,6 +12,7 @@ interface PageProps extends React.PropsWithChildren {
     icon: React.ComponentType<IconProps>;
     toolbar?: ToolbarItem[];
     fullContent?: boolean;
+    contentRef?: React.Ref<HTMLDivElement | null>;
 }
 
 function HeaderIcon(props: ToolbarItem) {
@@ -28,8 +30,10 @@ function HeaderIcon(props: ToolbarItem) {
 export const BasePage = React.forwardRef((props: React.PropsWithChildren, ref: React.ForwardedRef<HTMLDivElement>) => {
     const ownsChannelBar = useInternalStore(RouteManager, () => RouteManager.channelBar.owns());
 
+    const {pathname} = useLocation();
+
     const content = (
-        <main className="bd-page" ref={ref}>
+        <main className="bd-page" ref={ref} data-route-path={pathname}>
             {props.children}
         </main>
     );
@@ -70,7 +74,7 @@ function Page(props: PageProps) {
                 </Header.Title>
             </Header>
             {props.fullContent ? props.children : (
-                <div className="bd-content">
+                <div className="bd-content" ref={props.contentRef}>
                     {props.children}
                 </div>
             )}

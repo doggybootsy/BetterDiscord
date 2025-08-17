@@ -1,17 +1,26 @@
 import React from "react";
 
 import Settings, {type SettingsCollection} from "@stores/settings";
-import type {RouteComponentProps} from "react-router";
+import type {RedirectProps, RouteComponentProps} from "react-router";
 import Page from "./Page";
 import {t} from "@common/i18n";
-import {Cloudy, Cog, ListRestartIcon, Palette, PlugIcon} from "lucide-react";
+import {Cloudy, Cog, ListRestartIcon} from "lucide-react";
 import type {RouteParams} from "@modules/routemanager";
 import SettingsGroup from "@ui/settings/group";
 import JsonStore from "@stores/json";
 import Events from "@modules/emitter";
 import HomePage from "./home";
-import AddonPage from "./addons";
+import {AddonList, AddonStore} from "./addons";
 import CustomCSSPage from "./Custom-CSS";
+import AddonSettings from "./addons/AddonSettings";
+import PluginManager from "@modules/pluginmanager";
+import {getLazyByStrings} from "@webpack";
+import addonStore from "@modules/addonstore";
+
+let Redirect = (_: RedirectProps) => null;
+getLazyByStrings([".pathname", "onMount:function", ".computedMatch"], {searchExports: true}).then((_Redirect) => {
+    Redirect = _Redirect as typeof Redirect;
+});
 
 function Logo(props: {
     className: string,
@@ -111,17 +120,30 @@ function BetterDiscordRoute(props: BetterDiscordRouteProps) {
                     );
                 }
                 if ("addon" in props.match.params) {
-                    const icon = props.match.params.addon === "themes" ? Palette : PlugIcon;
+                    if (path.startsWith("/store/")) {
+                        if ("id" in props.match.params) {
+                            addonStore.requestAddon(props.match.params.id).then((addon) => addon.download());
 
-                    if (path.endsWith("/store")) {
+                            return <Redirect to={`/betterdiscord/store/${props.match.params.addon}`} />;
+                        }
+                        return <AddonStore key={props.match.params.addon} addon={props.match.params.addon} />;
+                    }
+
+                    if ("id" in props.match.params) {
+                        const addon = PluginManager.getAddon(props.match.params.id);
+
+                        if (addon) {
+                            return <AddonSettings addon={addon} />;
+                        }
+
                         return (
-                            <Page title={`${props.match.params.addon} Store`} toolbar={[]} icon={icon}>
-                                <div style={{color: "red"}}>{props.match.params.addon} Store</div>
+                            <Page title="404" toolbar={[]} icon={Logo}>
+                                <div style={{color: "red"}}>Plugin {props.match.params.id} not found</div>
                             </Page>
                         );
                     }
 
-                    return <AddonPage addon={props.match.params.addon} />;
+                    return <AddonList key={props.match.params.addon} addon={props.match.params.addon} />;
                 }
 
                 return (

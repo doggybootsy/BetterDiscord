@@ -6,7 +6,7 @@ import thememanager from "@modules/thememanager";
 import settings from "@stores/settings";
 import Text from "@ui/base/text";
 import {useInternalStore} from "@ui/hooks";
-import getDebugInfo, {getAddonCounts, getCoreInfo, getDiscordInfo} from "@utils/debug";
+import getDebugInfo, {getAddonCounts, getCoreInfo} from "@utils/debug";
 import {shallowEqual} from "fast-equals";
 
 const {useMemo, useState, useCallback} = React;
@@ -20,11 +20,6 @@ export default function VersionInfo() {
 
     const currentUser = useMemo(() => DiscordModules.UserStore?.getCurrentUser()?.id, []);
     const isCanary = useInternalStore(settings, () => settings.get("developer", "canary"));
-
-    const discordInfo = useMemo(() => {
-        const info = getDiscordInfo(false) as string[];
-        return info.map((i: string) => <Text color={Text.Colors.MUTED} size={Text.Sizes.SIZE_12}>{i}</Text>);
-    }, []);
 
     const onClick = useCallback(() => {
         DiscordNative?.clipboard?.copy(`\`\`\`md\n${getDebugInfo()}\n\`\`\``);
@@ -62,7 +57,6 @@ export default function VersionInfo() {
 
     return <DiscordModules.Tooltip color={color} position="top" text={tooltip}>
         {(props: any) => <div {...props} className="bd-version-info" onClick={onClick} onMouseLeave={e => {props.onMouseLeave(e); onMouseLeave();}}>
-            {discordInfo}
             <Text color={Text.Colors.MUTED} size={Text.Sizes.SIZE_12}>
                 BD {getCoreInfo()}
             </Text>
